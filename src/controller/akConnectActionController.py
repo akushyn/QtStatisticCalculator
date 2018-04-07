@@ -8,4 +8,4 @@ class AkConnectActionController(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.setModal(True)
         self.setWindowTitle("Connect")
-        self.show()
+        #self.show()

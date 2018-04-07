@@ -246,7 +246,7 @@ class Ui_AkCalculatorMainView(object):
         self.actionJoy.setText(_translate("AkCalculatorMainView", "Joy"))
 
 from pyqtgraph import PlotWidget
-import src.resources.menuIcons
+import menuIcons_rc
 
 if __name__ == "__main__":
     import sys

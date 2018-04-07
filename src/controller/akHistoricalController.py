@@ -1,68 +1,76 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QFileDialog
+
+import src.controller.akFunctions as func
 from src.view.ui_historicalView import Ui_Dialog
 import csv
-import src.controller.akFunctions as fn
-from src.model.akInstrumentDataTableModel import AkInstrumentDataTableModel
+import src.controller.akFunctions
+from src.model.akTableModel import AkTableModel
+from src.model.akInstrument import AkInstrument
 
 import sip
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 
 class AkHistoricalController(QtWidgets.QDialog):
-
-    #model = PalleteTableModel(tableData, headers)
-
-
-    def __init__(self):
+    def __init__(self, model=None):
         super(AkHistoricalController, self).__init__()
+        self.model = model
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        self.setModal(True)
-        self.setWindowTitle("Historical Data Manager")
-        self.show()
 
         self.initUI()
         self.setupConnections()
-        self.loadData()
+        self.loadModelData()
 
     #----------------------------------------------------------------------
     # Private methods
     # ---------------------------------------------------------------------
 
     def initUI(self):
-        self.ui.tableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.setModal(True)
+        self.setWindowTitle("Historical Data Manager")
 
-    def loadData(self):
+        self.ui.tableViewOHLC.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.ui.tableViewOHLC.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
 
-        # load default file from PC
-        # TODO : load data from config
-        headers, data = self.loadCSV('G:/Programming/Projects/StatisticCalculatorQt/src/resources/^spx_y.csv')
-        self.model = AkInstrumentDataTableModel(data, headers)
-        self.ui.tableView.setModel(self.model)
-
-
+    def loadModelData(self):
+        self.ui.listViewImported.setModel(self.model)
 
     def setupConnections(self):
         self.ui.btnImport.clicked.connect(self.OnImportButton_click_Handler)
         self.ui.btnFilter.clicked.connect(self.OnFilterButton_clickHandler)
-        self.ui.btnDownload.clicked.connect(self.OnDownloadButton_clickHandler)
+        self.ui.listViewImported.clicked.connect(self.OnListView_clickHandler)
+
 
     #----------------------------------------------------------------------
     # Event handlers
     # ---------------------------------------------------------------------
 
+    def OnListView_clickHandler(self, index):
+        data = self.ui.listViewImported.model().itemData(index.row())
+        self.ui.tableViewOHLC.setModel(data)
+
     def OnImportButton_click_Handler(self):
-        fileName = self.openFileNameDialog()
-        print(fileName)
-        self.loadCSV(fileName)
-        self.ui.tableView.setModel(self.model)
+        pathFileName = self.openFileNameDialog()
+        if (not pathFileName):
+            return
+
+        shortName = func.getShortName(pathFileName)
+
+        headers, data = func.loadCSV(pathFileName)
+        ohlc = AkTableModel(data, headers)
+
+        self.instrument = AkInstrument(shortName, ohlc)
+        self.model.insertRows(0, 1, [self.instrument])
+
 
     def OnFilterButton_clickHandler(self):
         print("OnFilterButton_clickHandler method called!")
 
     def OnDownloadButton_clickHandler(self):
         print("OnDownloadButton_clickHandler method called!")
+
 
     #----------------------------------------------------------------------
     # Other methods
@@ -84,25 +92,6 @@ class AkHistoricalController(QtWidgets.QDialog):
                                                   "All Files (*);;Text Files (*.txt)", options=options)
         if fileName:
             return fileName
-
-    # self.loadCSV(fileName)
-    #        print(fileName)
-
-    def loadCSV(self, fileName):
-        data = []
-        with open(fileName, "r") as fileInput:
-            for row in csv.reader(fileInput):
-                items = [field for field in row ]
-                data.append(items)
-
-            # remove 'Volume' column
-            for row in data:
-                del row[5]
-
-            # get 'Headers'
-            headers = data.pop(0)
-        return headers, data
-
 
     def writeCSV(self, fileName):
         with open(fileName, "wb") as fileOutput:

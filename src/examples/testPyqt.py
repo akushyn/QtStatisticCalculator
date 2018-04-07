@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 import  sys
-from src.model.akInstrumentListModel import AkNameListModel
+from src.model.akInstrumentListModel import AkInstrumentListModel
 
 
 

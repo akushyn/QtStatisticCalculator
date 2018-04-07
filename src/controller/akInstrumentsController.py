@@ -2,13 +2,15 @@ from PyQt5 import QtWidgets, uic
 from src.view.ui_instrumentView import Ui_Dialog
 
 class AkInstrumentsController(QtWidgets.QDialog):
-    def __init__(self):
+    def __init__(self, model=None):
         super(AkInstrumentsController, self).__init__()
         self.ui = Ui_Dialog()
+        self.model = model
+
         self.ui.setupUi(self)
         self.setModal(True)
         self.setWindowTitle("Instrument Data Manager")
-        self.show()
+        #self.show()
 
         self.initUI()
         self.setupConnections()
@@ -23,6 +25,10 @@ class AkInstrumentsController(QtWidgets.QDialog):
 
     def loadData(self):
         pass
+        #self.model = AkInstrumentListModel()
+        #self.ui.listWatch.setModel(self.model)
+        #self.ui.listChecked.setModel(self.model)
+
 
 
     def setupConnections(self):
@@ -53,7 +59,7 @@ class AkInstrumentsController(QtWidgets.QDialog):
         print("OnOkButton_clickHandler method called!")
 
     def OnCancelButton_clickHandler(self):
-        print("OnCancelButton_clickHandler method called!")
+        self.close()
 
     def OnNewButton_clickHandler(self):
         print("OnNewButton_clickHandler method called!")

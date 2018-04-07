@@ -1,9 +1,9 @@
 from PyQt5 import QtCore, QtGui
 
-class AkInstrumentDataTableModel(QtCore.QAbstractTableModel):
+class AkTableModel(QtCore.QAbstractTableModel):
     defaultHeaders = ["Date", "Open", "High", "Low", "Close"]
     def __init__(self, items = [[]], headers = defaultHeaders, parent = None):
-        super(AkInstrumentDataTableModel, self).__init__(parent)
+        super(AkTableModel, self).__init__(parent)
         self.__items = items
         self.__headers = headers
 
@@ -48,12 +48,10 @@ class AkInstrumentDataTableModel(QtCore.QAbstractTableModel):
         if (role == QtCore.Qt.EditRole):
             row = index.row()
             column = index.column()
-            color = QtGui.QColor(value)
+            self.__items[row][column] = value
+            self.dataChanged.emit(index, index)
 
-            if (color.isValid()):
-                self.__items[row][column] = color
-                self.dataChanged.emit(index, index)
-                return True
+            return True
 
         if (role == QtCore.Qt.DisplayRole):
             row = index.row()
@@ -100,3 +98,4 @@ class AkInstrumentDataTableModel(QtCore.QAbstractTableModel):
                 del row[position]
 
         self.endRemoveColumns()
+

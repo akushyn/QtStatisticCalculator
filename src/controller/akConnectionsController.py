@@ -8,7 +8,7 @@ class AkConnectionsController(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.setModal(True)
         self.setWindowTitle("Setup Connection")
-        self.show()
+        #self.show()
 
     def doSmth(self):
         pass

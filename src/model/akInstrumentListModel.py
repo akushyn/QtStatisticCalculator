@@ -1,14 +1,17 @@
 from PyQt5 import QtCore, QtGui
 
-class AkNameListModel(QtCore.QAbstractListModel):
+from src.model.akInstrument import AkInstrument
+
+
+class AkInstrumentListModel(QtCore.QAbstractListModel):
     DEFAULT_NAME = "NAME_"
 
-    def __init__(self, names = [], parent = None):
-        super(AkNameListModel, self).__init__(parent)
-        self.names = names
+    def __init__(self, items = [], parent = None):
+        super(AkInstrumentListModel, self).__init__(parent)
+        self._items = items
 
     def rowCount(self, parent):
-        return len(self.names)
+        return len(self._items)
 
     def headerData(self, section, orientation, role=None):
         if (role == QtCore.Qt.DisplayRole):
@@ -19,15 +22,15 @@ class AkNameListModel(QtCore.QAbstractListModel):
 
     def data(self, index, role=None):
         if (role == QtCore.Qt.ToolTipRole):
-            return "Hex code:" + self.names[index.row()]
+            return self._items[index.row()].name()
 
         if (role == QtCore.Qt.DisplayRole):
             row = index.row()
-            value = self.names[row]
-            return value
+            value = self._items[row]
+            return value.name()
 
         if (role == QtCore.Qt.EditRole):
-            return self.names[index.row()]
+            return self._items[index.row()].name()
 
 
     def flags(self, QModelIndex):
@@ -38,7 +41,7 @@ class AkNameListModel(QtCore.QAbstractListModel):
         if (role == QtCore.Qt.EditRole):
             row = index.row()
 
-            self.names[row] = value
+            self._items[row].setName(value)
             self.dataChanged.emit(index, index)
             return True
 
@@ -47,15 +50,25 @@ class AkNameListModel(QtCore.QAbstractListModel):
 
         return False
 
+    def setItemData(self, index, data, p_int=None, Any=None):
+        self._items[index].setData(data)
+        #self.dataChanged.emit(index, index)
+
+    def itemData(self, index):
+        return self._items[index].data()
+
     def insertRows(self, position, rows, values = [], parent=QtCore.QModelIndex()):
         self.beginInsertRows(parent, position, position + rows - 1)
 
         if (not values):
             for i in range(rows):
-                self.names.insert(position, self.DEFAULT_NAME + str(i))
+                it = AkInstrument(self.DEFAULT_NAME, None)
+                self._items.insert(position, it)
+                self.setItemData(i, it.data())
         else:
             for i in range(rows):
-                self.names.insert(position, values[i])
+                self._items.insert(position, values[i])
+                self.setItemData(i, values[i].data())
 
         self.endInsertRows()
 
@@ -64,7 +77,7 @@ class AkNameListModel(QtCore.QAbstractListModel):
         self.beginRemoveRows(parent, position, position + rows - 1)
 
         for i in range(rows):
-            value = self.names[position]
-            self.names.remove(value)
+            it = self._items[position]
+            self._items.remove(it)
 
         self.endRemoveRows()
