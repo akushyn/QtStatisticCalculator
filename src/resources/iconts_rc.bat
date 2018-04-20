@@ -1,1 +1,0 @@
-pyrcc5 -o G:\Programming\Projects\StatisticCalculatorQt\src\resources\menuIcons.py G:\Programming\Projects\StatisticCalculatorQt\src\resources\menuIcons.qrc
