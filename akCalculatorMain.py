@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtWidgets
-from src.Controllers import AkCalculatorController
+from src.controllers.akCalculatorController import AkCalculatorController
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

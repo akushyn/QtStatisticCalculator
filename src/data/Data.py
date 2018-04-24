@@ -1,25 +1,5 @@
 from enum import Enum
 
-class AkInstrument(object):
-    def __init__(self, name='', dSeries=[], wSeries=[], mSeries=[], qSeries=[], ySeries=[]):
-        self._name = name
-        self._dSeries = dSeries
-        self._wSeries = wSeries
-        self._mSeries = mSeries
-        self._qSeries = qSeries
-        self._ySeries = ySeries
-
-    def getName(self):
-        return self._name
-
-    def setName(self, name):
-        self._name = name
-
-    def data(self):
-        return self._data
-
-    def setData(self, data):
-        self._data = data
 
 class AkNode(object):
     def __init__(self, name, parent=None):
@@ -70,15 +50,13 @@ class AkNode(object):
     def __repr__(self):
         return self.log()
 
-class AkSerialityType(Enum):
-    Compact = 1
-    Stretch = 2
+if __name__ == '__main__':
+    series = {'D': [1,2,3,4,5,6,7], 'W': [], 'M': [], 'Q': [], 'Y': []}
+    print(series['D'])
 
-class AkSeriality(object):
-    def __init__(self, sequence=[], type=AkSerialityType.Compact):
-        self._sequence = sequence
-        self._type = type
+    aaa = {}
+    aaa['z'] = [1,2,3]
 
-    def findPattern(self, pattern):
-        
-        str = '+-0++-+++0-'
+    print(aaa)
+    lst = aaa['z']
+    print(lst[2])
