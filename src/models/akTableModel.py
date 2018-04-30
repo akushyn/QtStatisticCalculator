@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui
 
-from src.data.akSeriality import AkSerialityInfo, AkSequence, AkSerialityIndexes, AkPattern, AkSerialityDates, \
-    AkSerialityOHLC
+from src.data.akAmplitudeDictionary import AkAmplitudeDictionary
+from src.data.akSeriality import AkSeriality
 
 
 class AkTableModel(QtCore.QAbstractTableModel):
@@ -10,7 +10,7 @@ class AkTableModel(QtCore.QAbstractTableModel):
         super(AkTableModel, self).__init__(parent)
         self.__name = name
         self._items = items
-        self.__headers = headers
+        self._headers = headers
 
     def getName(self):
         return self.__name
@@ -30,8 +30,8 @@ class AkTableModel(QtCore.QAbstractTableModel):
     def headerData(self, section, orientation, role=None):
         if (role == QtCore.Qt.DisplayRole):
             if (orientation == QtCore.Qt.Horizontal):
-                if (section < len(self.__headers)):
-                    return self.__headers[section]
+                if (section < len(self._headers)):
+                    return self._headers[section]
                 else:
                     return "Not Defined"
             else:
@@ -108,10 +108,13 @@ class AkTableModel(QtCore.QAbstractTableModel):
 
         self.endRemoveColumns()
 
-class AkInstrumentOHLCModel(AkTableModel):
+class AkInstrumentTableModel(AkTableModel):
     def __init__(self, name = '', items=[[]], headers=[], parent=None):
-        super(AkInstrumentOHLCModel, self).__init__(name, items, headers, parent)
+        super(AkInstrumentTableModel, self).__init__(name, items, headers, parent)
         self._items = items
+        self._seriality = AkSeriality(ohlcData=items, parent=self)
+        self._amplitude = AkAmplitudeDictionary(ohlcData=items, parent=self)
+        #self._amplitude = AkAmplitude(self.getName(), items)
 
     def distributionTable(self):
         print(self.getName())
@@ -139,92 +142,57 @@ class AkInstrumentOHLCModel(AkTableModel):
 
         self.removeRows(position, rows)
 
-    def getSequence(self):
-        rowCount = self.rowCount()
-        seq = []
-
-        diff = self._open_close_diff(0)
-        if (diff > 0):
-            seq.append(1)
-        elif (diff < 0):
-            seq.append(-1)
-        else:
-            seq.append(0)
-
-        for i in range(1, rowCount):
-            if (self._open_close_diff(i) > 0):
-                if (seq[i - 1] > 0):
-                    seq.append(seq[i - 1] + 1)
-                elif (seq[i - 1] <= 0):
-                    seq.append(1)
-
-            if (self._open_close_diff(i) < 0):
-                if (seq[i - 1] >= 0):
-                    seq.append(-1)
-                elif (seq[i - 1] < 0):
-                    seq.append(seq[i - 1] - 1)
-
-            if (self._open_close_diff(i) == 0):
-                seq.append(0)
-
-        return AkSequence(seq)
+    def getSeriality(self):
+        return self._seriality
 
 
-    def _open_close_diff(self, idx):
-        return float(self._items[idx][4]) - float(self._items[idx][1])
+    def exportToFile(self, pathFileName=''):
+        fileName = 'export_' + pathFileName + self.getName() + '.txt'
+        seriality = self.getSeriality()
+        serialityIndexes =  seriality.getSerialityIndexesDictionary()
 
-    def getSerialityIndexes(self):
-        sequence = self.getSequence()
+        ohlcDictionary = seriality.getSerialityOHLCDictionary()
+        datesDictionary = seriality.getSerialityStartDatesDictionary()
 
-        indexesDictionary = {}
-        for degree in range(sequence.min(), sequence.max() + 1):
-            pattern = AkPattern(degree)
-            indexes = sequence.patternIndexes(pattern)
-            if (indexes):
-                indexesDictionary[degree] = indexes
+        with open(fileName, "w") as text_file:
+            print("Instrument:", self.getName(), file=text_file)
+            print("----------------------------------------------------------------------------------------------------", file=text_file)
+            print("Sequence: ", seriality.getSerialitySequenceList(), file=text_file)
+            print("Min: ", min(serialityIndexes.keys()), file=text_file)
+            print("Max: ", max(serialityIndexes.keys()), file=text_file)
 
-        return AkSerialityIndexes(indexesDictionary)
+            print("Quantities: ", seriality.getSerialityQuantitiesDictionary(), file=text_file)
+            print("Degrees: ", serialityIndexes.keys(), file=text_file)
+            print("Indexes Matrix: ", serialityIndexes, file=text_file)
 
-    def getSerialityOHLC(self):
-        serialityIndexes = self.getSerialityIndexes()
+            print('', file=text_file)
+            print("----------------------------------------------------------------------------------------------------", file=text_file)
+            for degree in ohlcDictionary.keys():
+                print("Seriality:", degree, file=text_file)
+                print("Quantity:", len(serialityIndexes[degree]), file=text_file)
+                print("Events start dates:", datesDictionary[degree], file=text_file)
+                print('', file=text_file)
+                ohlcTable = ohlcDictionary[degree]
+                print("OHLC Data: ", file=text_file)
+                for i in range(len(ohlcTable)):
+                    print(ohlcTable[i], file=text_file)
+                print('', file=text_file)
 
-        ohlcDictionary = {}
-        for degree in serialityIndexes.degrees():
-            ohlc = []
-            for idx in serialityIndexes.indexes(degree):
-                for i in range(abs(degree)):  # use abs! because degree cat be negative value
-                    ohlc.append(self._items[idx + i])
-            ohlcDictionary[degree] = ohlc
+                amplitudeDict = AkAmplitudeDictionary(ohlcTable)
+                amplitudes = amplitudeDict.amplitudes()
+                print("Amplitudes: ", file=text_file)
 
-        return AkSerialityOHLC(ohlcDictionary)
+                for key in amplitudes.keys():
+                    print(key, amplitudes[key], file=text_file)
 
-    def getSerialityDates(self):
-        serialityIndexes = self.getSerialityIndexes()
+                print("----------------------------------------------------------------------------------------------------", file=text_file)
 
-        datesDictionary = {}
-        for degree in serialityIndexes.degrees():
-            datesList = []
-            indexes = serialityIndexes.indexes(degree)
-            for idx in indexes:
-                datesList.append(self._items[idx][0])
-            datesDictionary[degree] = datesList
 
-        return AkSerialityDates(datesDictionary)
 
-    def getSerialityInfo(self):
-        info = AkSerialityInfo()
 
-        info.setSequence(self.getSequence())
-        info.setIndexes( self.getSerialityIndexes())
-        info.setInstrumentName(self.getName())
-        info.setOHLC(self.getSerialityOHLC())
-        info.setDates(self.getSerialityDates())
-
-        return info
-
-class AkNotesModel(AkTableModel):
+class AkNotesTableModel(AkTableModel):
     def __init__(self):
-        super(AkNotesModel, self).__init__(items = [['', '']], headers = ["Date", "Note"], parent=None)
+        super(AkNotesTableModel, self).__init__(items = [['', '']], headers = ["Date", "Note"], parent=None)
 
     def flags(self, index):
         return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable

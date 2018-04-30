@@ -1,6 +1,6 @@
 from enum import Enum
 
-class AkPatternEnum(Enum):
+class AkPatternType(Enum):
     POSITIVE = 1
     NEGATIVE = -1
 
@@ -11,22 +11,26 @@ class AkPattern(object):
         self._type = self._set_type()
 
     def degree(self):
+        '''Get degree of pattern.'''
         return self._degree
 
     def type(self):
+        '''Get pattern type: return: AkPatternType.'''
         return self._type
 
     def length(self):
+        '''Get length of pattern.'''
         return len(self._list)
 
     def list(self):
+        '''Get pattern list.'''
         return self._list
 
     def _set_type(self):
         if (self._degree > 0):
-            return AkPatternEnum.POSITIVE
+            return AkPatternType.POSITIVE
 
-        return AkPatternEnum.NEGATIVE
+        return AkPatternType.NEGATIVE
 
     def _set_list(self):
         s = []
@@ -46,10 +50,11 @@ class AkSequence(object):
         self._list = sequence
 
     def sequence(self):
+        '''Get sequence list.'''
         return self._list
 
     def patternIndexes(self, pattern):
-        # skip seriality length < 2
+        '''Get List of pattern indexes'''
         if (pattern.degree() == 0) or (pattern.degree() == -1) or (pattern.degree() == 1):
             return []
 
@@ -61,35 +66,38 @@ class AkSequence(object):
         return matches
 
     def _valid_boundaries(self, idx, pattern):
+        '''Check if pattern has valid boundaries.'''
         type = pattern.type()
 
         # exception when only right boundary
         if (idx == 0):
-            if (type == AkPatternEnum.NEGATIVE) and (self._list[idx + pattern.length()] == 1):
+            if (type == AkPatternType.NEGATIVE) and (self._list[idx + pattern.length()] == 1):
                 return True
 
-            if (type == AkPatternEnum.POSITIVE) and (self._list[idx + pattern.length()] == -1):
+            if (type == AkPatternType.POSITIVE) and (self._list[idx + pattern.length()] == -1):
                 return True
         # exception when only left boundary
         elif (idx == self.length() - pattern.length()):
-            if (type == AkPatternEnum.NEGATIVE) and (self._list[idx - 1] > 0):
+            if (type == AkPatternType.NEGATIVE) and (self._list[idx - 1] > 0):
                 return True
 
-            if (type == AkPatternEnum.POSITIVE) and (self._list[idx - 1] < 0 ):
+            if (type == AkPatternType.POSITIVE) and (self._list[idx - 1] < 0):
                 return True
         else:
-            if (type == AkPatternEnum.NEGATIVE) and (self._list[idx-1] > 0) and (self._list[idx + pattern.length()] == 1):
+            if (type == AkPatternType.NEGATIVE) and (self._list[idx-1] > 0) and (self._list[idx + pattern.length()] == 1):
                 return True
 
-            if (type == AkPatternEnum.POSITIVE) and (self._list[idx-1] < 0) and (self._list[idx + pattern.length()] == -1):
+            if (type == AkPatternType.POSITIVE) and (self._list[idx-1] < 0) and (self._list[idx + pattern.length()] == -1):
                 return True
 
         return False
 
     def max(self):
+        '''Get Max el of sequence.'''
         return max(self._list)
 
     def min(self):
+        '''Get Min el of sequence.'''
         minValue = self._list[0]
         for i in range(self.length()):
             if (self._list[i] < minValue) and (abs(self._list[i]) > 1):
@@ -97,134 +105,149 @@ class AkSequence(object):
         return minValue
 
     def length(self):
+        '''Get length of sequence.'''
         return len(self._list)
 
 class AkSeriality(object):
-    def __init__(self, degree, items):
-        self._degree = degree
-        self._items = items
-
-    def degree(self):
-        return self._degree
-
-    def indexes(self):
-        return self._items
-
-    def quantity(self):
-        return len(self._items)
-
-class AkSerialityIndexes():
-    def __init__(self, indexes={}):
-        self._indexes = indexes
-
-    def degrees(self):
-        '''
-        Get a list of serialities. Degree can be positive or negative.
-
-        Negative means, that its a bearish sequence of bars.
-        Positive means, that its a bulish sequence of bars.
-        :return: list[]
-        '''
-        return self._indexes.keys()
-
-    def values(self):
-        return self._indexes.values()
-
-    def quantity(self, degree):
-        return len(self._indexes[degree])
-
-    def indexes(self, degree):
-        '''Gets list of indexes by degree. Returns: list[]'''
-        return self._indexes[degree]
-
-    def max(self):
-        return max(self._indexes.keys())
-
-    def min(self):
-        return min(self._indexes.keys())
-
-    def matrix(self):
-        return self._indexes
-
-class AkSerialityDates(object):
-    def __init__(self, dates):
-        self._dates = dates
-
-    def degrees(self):
-        return self._dates.keys()
-
-    def values(self):
-        return self._dates.values()
-
-    def dates(self, degree):
-        return self._dates[degree]
-
-class AkSerialityOHLC(object):
-    def __init__(self, ohlc):
-        self._ohlc = ohlc
-
-    def degrees(self):
-        return self._ohlc.keys()
-
-    def values(self):
-        return self._ohlc.values()
-
-    def ohlc(self, degree):
-        return self._ohlc[degree]
+    def __init__(self, ohlcData, parent=None):
+        self._ohlcData = ohlcData
 
 
-class AkSerialityInfo(object):
-    def __init__(self, ohlc = None):
-        self._sequence = None
-        self._indexesMatrix = None
-        self._instrumentName = ''
-        self._ohlc = None
-        self._dates = None
+        if (parent is not None):
+            self._name = parent.getName()
+        else:
+            self._name = ''
 
-    def setIndexes(self, indexesMatrix):
-        self._indexesMatrix = indexesMatrix
+    #----------------------------------------------------------------------
+    # Get methods
+    # ---------------------------------------------------------------------
 
-    def getIndexes(self):
-        return self._indexesMatrix
+    def getSerialityIndexesDictionary(self):
+        sequence = AkSequence(self.getSerialitySequenceList())
 
-    def setSequence(self, sequence):
-        self._sequence = sequence
+        indexesDictionary = {}
+        for degree in range(sequence.min(), sequence.max() + 1):
+            pattern = AkPattern(degree)
+            indexes = sequence.patternIndexes(pattern)
+            if (indexes):
+                indexesDictionary[degree] = indexes
 
-    def getSequence(self):
-        return self._sequence
+        return indexesDictionary
 
-    def setInstrumentName(self, instrumentName):
-        self._instrumentName = instrumentName
+    def getSerialitySequenceList(self):
+        rowCount = len(self._ohlcData)
+        sequence = []
+
+        diff = self._open_close_diff(0)
+        if (diff > 0):
+            sequence.append(1)
+        elif (diff < 0):
+            sequence.append(-1)
+        else:
+            sequence.append(0)
+
+        for i in range(1, rowCount):
+            if (self._open_close_diff(i) > 0):
+                if (sequence[i - 1] > 0):
+                    sequence.append(sequence[i - 1] + 1)
+                elif (sequence[i - 1] <= 0):
+                    sequence.append(1)
+
+            if (self._open_close_diff(i) < 0):
+                if (sequence[i - 1] >= 0):
+                    sequence.append(-1)
+                elif (sequence[i - 1] < 0):
+                    sequence.append(sequence[i - 1] - 1)
+
+            if (self._open_close_diff(i) == 0):
+                sequence.append(0)
+
+        return sequence
 
     def getInstrumentName(self):
-        return self._instrumentName
+        return self._name
 
-    def setOHLC(self, ohlc):
-        self._ohlc = ohlc
+    def getSerialityOHLCDictionary(self):
+        indexesDict = self.getSerialityIndexesDictionary()
 
-    def getOHLC(self):
-        return self._ohlc
+        ohlcDict = {}
+        for degree in indexesDict.keys():
+            ohlc = []
+            for idx in indexesDict[degree]:
+                for i in range(abs(degree)):  # use abs! because degree cat be negative value
+                    ohlc.append(self._ohlcData[idx + i])
+            ohlcDict[degree] = ohlc
 
-    def setDates(self, dates):
-        self._dates = dates
+        return ohlcDict
 
-    def getDates(self):
-        return self._dates
+    def getSerialityStartDatesDictionary(self):
+        indexesDict = self.getSerialityIndexesDictionary()
 
-    def quantities(self):
-        quantities = {}
-        for degree in self.degrees():
-            quantities[degree] = self._indexesMatrix.quantity(degree)
+        datesDict = {}
+        for degree in indexesDict.keys():
+            dates = []
+            for idx in indexesDict[degree]:
+                dates.append(self._ohlcData[idx][0])
+            datesDict[degree] = dates
 
+        return datesDict
+
+    def getSerialityQuantitiesDictionary(self):
+        indexesDict = self.getSerialityIndexesDictionary()
+        quantitiesDict = {}
+        for degree in indexesDict.keys():
+            quantitiesDict[degree] = len(indexesDict[degree])
+
+        return quantitiesDict
+
+
+    def writeToFile(self, pathFileName):
+        serialityIndexes = self.getSerialityIndexesDictionary()
+        with open(pathFileName, "w") as text_file:
+            print("Instrument:", self.getInstrumentName(), file=text_file)
+            print("Sequence: ", self.getSerialitySequenceList(), file=text_file)
+            print("Min: ", min(serialityIndexes.keys()), file=text_file)
+            print("Max: ", max(serialityIndexes.keys()), file=text_file)
+
+            print("Quantities: ", self.getSerialityQuantitiesDictionary(), file=text_file)
+            print("Degrees: ", serialityIndexes.keys(), file=text_file)
+            print("Indexes Matrix: ", serialityIndexes, file=text_file)
+
+            ohlcDictionary = self.getSerialityOHLCDictionary()
+            datesDictionary = self.getSerialityStartDatesDictionary()
+
+            print("", file=text_file)
+            print("--------------------------------------------------", file=text_file)
+            for degree in ohlcDictionary.keys():
+                print("Seriality:", degree, file=text_file)
+                print("Quantity:", len(serialityIndexes[degree]), file=text_file)
+                print("Events start dates:", datesDictionary[degree], file=text_file)
+
+                ohlcList = ohlcDictionary[degree]
+                for i in range(len(ohlcList)):
+                    print(ohlcList[i], file=text_file)
+                print("", file=text_file)
+
+    #----------------------------------------------------------------------
+    # Private methods
+    # ---------------------------------------------------------------------
+
+    def _open_close_diff(self, idx):
+        return float(self._ohlcData[idx][4]) - float(self._ohlcData[idx][1])
+
+
+    def _calc_ohlc_dict(self):
+
+        return ohlcDict
+
+    def _calc_dates_dict(self):
+
+        return datesDict
+
+    def _calc_quantities_dict(self):
+
+        return quantitiesDict
 
 if __name__ == '__main__':
 
-
     str = [1,-1,-2,-3,-4,1,-1,1,-1,-2,-3,1,-1,1,-1,-2,-3,-4,1,2,3,4,5,6,-1,1,2,3,-1,1,-1,-2,-3,1,2,3,-1,-2,-3,1]
-    sequence = AkSequence(str)
-
-    print("Min: ", sequence.min())
-    print("Max: ", sequence.max())
-
-    matrix = sequence.serialityIndexes()
-    print("Seriality Matrix:", matrix)

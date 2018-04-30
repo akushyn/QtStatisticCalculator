@@ -1,16 +1,15 @@
 from PyQt5 import QtCore
-
-from src.data.akSeriality import AkSequence, AkSerialityIndexes, AkSerialityInfo
-from src.models.akTableModel import AkInstrumentOHLCModel
+from src.models.akTableModel import AkInstrumentTableModel
 
 
 class AkInstrumentListModel(QtCore.QAbstractListModel):
     DEFAULT_NAME = "NAME_"
 
     # items of 'AkInstrument()'
-    def __init__(self, items = [], parent = None):
+    def __init__(self, items = [], headers = [], parent = None):
         super(AkInstrumentListModel, self).__init__(parent)
         self._items = items
+        self._headers = headers
 
     def rowCount(self, parent):
         return len(self._items)
@@ -18,7 +17,7 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
     def headerData(self, section, orientation, role=None):
         if (role == QtCore.Qt.DisplayRole):
             if (orientation == QtCore.Qt.Horizontal):
-                return QtCore.QVariant(section)#QtCore.QVariant("Pallete")
+                return self._headers(section)
             else:
                 return QtCore.QVariant(section)
 
@@ -62,7 +61,7 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
 
         if (not values):
             for i in range(rows):
-                it = AkInstrumentOHLCModel(self.DEFAULT_NAME)
+                it = AkInstrumentTableModel(self.DEFAULT_NAME)
                 self._items.insert(position, it)
                 self.setItemData(i, it.data())
         else:
@@ -82,22 +81,5 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
 
         self.endRemoveRows()
 
-    def distributionTable(self, index):
-        self._items[index.row()].distributionTable()
-
-    def serialitySequence(self, index):
-        return self._items[index.row()].getSerialitySequence()
-
-    def serialityMatrix(self, index):
-        return self._items[index.row()].serialityMatrix()
-
-    def serialityOHLC(self, index, seriality):
-        data = self._items[index.row()].serialityOHLC(seriality)
-        return data
-
-    def serialityDates(self, index, seriality):
-        data = self._items[index.row()].serialityDates(seriality)
-        return data
-
-    def getSerialityInfo(self, index):
-        return self._items[index.row()].getSerialityInfo()
+    def exportToFile(self, index):
+        self._items[index.row()].exportToFile()

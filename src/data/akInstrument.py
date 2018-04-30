@@ -1,22 +1,28 @@
-class AkInstrument(object):
-    def __init__(self, name='', data=[]):
-        self._name = name
+from enum import Enum
+from src.data.akNode import AkNode
 
-        self._series = {'D': [], 'W': [], 'M': [], 'Q': [], 'Y': []}
-        self._dSeries = dSeries
-        self._wSeries = wSeries
-        self._mSeries = mSeries
-        self._qSeries = qSeries
-        self._ySeries = ySeries
+class AkSectionType(Enum):
+    DAY     = 0
+    WEEK    = 1
+    MONTH   = 2
+    QUARTER = 3
+    YEAR    = 4
 
-    def getName(self):
-        return self._name
+class AkInstrument(AkNode):
+    def __init__(self, name, data=None, parent=None):
+        super(AkInstrument, self).__init__(name, parent)
 
-    def setName(self, name):
-        self._name = name
+        self._daySection = AkSection("Day", self)
+        self._weekSection = AkSection("Week", self)
+        self._monthSection = AkSection("Month", self)
+        self._quarterSection = AkSection("Quarter", self)
 
-    def data(self):
-        return self._data
+class AkSection(AkNode):
+    def __init__(self, name, parent=None):
+        super(AkSection, self).__init__(name, parent)
 
-    def setData(self, data):
-        self._data = data
+class AkPeriod(AkNode):
+    def __init__(self, name, sector=None, data=[[]], parent=None):
+        super(AkPeriod,self).__init__(name, parent)
+
+

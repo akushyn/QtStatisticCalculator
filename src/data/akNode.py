@@ -1,6 +1,6 @@
 from enum import Enum
 
-class AkInstrumentNode(object):
+class AkNode(object):
     def __init__(self, name, parent=None):
 
         self._name = name
@@ -72,24 +72,7 @@ class AkInstrumentNode(object):
 
         return output
 
-    def __repr__(self):
-        return self.log()
+    #def __repr__(self):
+    #    return self.log()
 
 
-class AkDaySection(AkInstrumentNode):
-    def __init__(self, name, parent=None):
-        super(AkDaySection, self).__init__(name, parent)
-
-    def typeInfo(self):
-        return "DaySection"
-
-class AkSection(AkInstrumentNode):
-    def __init__(self, name, parent=None):
-        super(AkSection, self).__init__(name, parent)
-
-class AkSectionType(Enum):
-    Day = 'D'
-    Week = 'W'
-    Month = 'M'
-    Quarter = 'Q'
-    Year = 'Y'

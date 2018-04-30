@@ -7,10 +7,11 @@ from src.controllers.akConnectionsController import AkConnectionsController
 from src.controllers.akHistoricalController import AkHistoricalController
 from src.controllers.akInstrumentsController import AkInstrumentsController
 from src.controllers.akOptionsController import AkOptionsController
-from src.data.akInstrumentNode import AkInstrumentNode, AkSection, AkSectionType
-from src.data.akSeriality import AkSequence
+from src.data.akAmplitudeDictionary import AkAmplitudeDictionary, AkCalculationMode
+from src.data.akInstrument import AkInstrument
+from src.data.akNode import AkNode
 from src.models.akListModel import AkInstrumentListModel
-from src.models.akTableModel import AkInstrumentOHLCModel, AkTableModel, AkNotesModel
+from src.models.akTableModel import AkInstrumentTableModel, AkTableModel, AkNotesTableModel
 from src.models.akTreeModel import AkInstrumentGraphModel
 from src.views.ui_calculatorMainView import Ui_CalculatorMainView
 import numpy as np
@@ -54,34 +55,21 @@ class AkCalculatorController(QtWidgets.QMainWindow, Ui_CalculatorMainView):
     def _setup_model(self):
         fileName = "G:/Programming/Projects/QtStatisticCalculator/src/resources/^spx_y.csv"
         headers, data = func.loadCSV(fileName)
-        items = AkInstrumentOHLCModel(func.getShortName(fileName), data, headers)
+        items = AkInstrumentTableModel(func.getShortName(fileName), data, headers)
 
-        self.instrumentsModel = AkInstrumentListModel([items])
-        self.notesModel = AkNotesModel()
+        self.instrumentsModel = AkInstrumentListModel([items], ["Instruments"])
+        self.notesModel = AkNotesTableModel()
 
 
         self.notesTableView.setModel(self.notesModel)
         self.instrumentsListView.setModel(self.instrumentsModel)
 
-        rootNode = AkInstrumentNode("Instruments")
+        rootNode = AkNode("Root")
+        treeModel = AkInstrumentGraphModel(rootNode, headers=["Instruments"])
 
-        _eurusd = AkInstrumentNode("EURUSD", rootNode)
-        _gbpusd = AkInstrumentNode("GBPUSD", rootNode)
-        _gold = AkInstrumentNode("GOLD", rootNode)
+        instrumentNode = AkInstrument(func.getShortName(fileName))
+        treeModel.insertRow(0, instrumentNode)
 
-        instruments = []
-        instruments.append(_eurusd)
-        instruments.append(_gbpusd)
-        instruments.append(_gold)
-
-        for i in range(3):
-            dSection = AkSection('D', instruments[i])
-            dSection = AkSection('W', instruments[i])
-            dSection = AkSection('M', instruments[i])
-            dSection = AkSection('Q', instruments[i])
-
-
-        treeModel = AkInstrumentGraphModel(rootNode)
         self.instrumentsTreeView.setModel(treeModel)
 
 
@@ -137,42 +125,14 @@ class AkCalculatorController(QtWidgets.QMainWindow, Ui_CalculatorMainView):
         self.textNote.setPlainText(sellData)
 
     def OnCalculateButton_clickHandler(self):
-            indexes = self.instrumentsListView.selectionModel().selectedIndexes()
-            model = self.instrumentsListView.model()
-            if (indexes):
-                selection = indexes[0]
+        indexes = self.instrumentsListView.selectionModel().selectedIndexes()
+        model = self.instrumentsListView.model()
+        if (not indexes):
+            self.statusbar.showMessage("No instrument selected", 3000)
+            return
 
-                serialityInfo = model.getSerialityInfo(selection)
-
-                with open("Output.txt", "w") as text_file:
-                    print("Instrument:", serialityInfo.getInstrumentName(), file=text_file)
-                    print("Sequence: ", serialityInfo.getSequence().sequence(), file=text_file)
-                    print("Min: ", serialityInfo.getIndexes().min(), file=text_file)
-                    print("Max: ", serialityInfo.getIndexes().max(), file=text_file)
-
-                    for degree in serialityInfo.getIndexes().degrees():
-                        print("Quantity[", degree, "]= ", serialityInfo.getIndexes().quantity(degree), file=text_file)
-
-                    print("Degrees: ", serialityInfo.getIndexes().degrees(), file=text_file)
-                    print("Indexes Matrix: ", serialityInfo.getIndexes().matrix(), file=text_file)
-
-
-                    ohlcDictionary = serialityInfo.getOHLC()
-                    datesDictionary = serialityInfo.getDates()
-
-                    print("", file=text_file)
-                    print("--------------------------------------------------", file=text_file)
-                    for degree in ohlcDictionary.degrees():
-                        print("Seriality:", degree, file=text_file)
-                        print("Quantity:", serialityInfo.getIndexes().quantity(degree), file=text_file)
-                        print("Events start dates:", datesDictionary.dates(degree), file=text_file)
-
-                        lst = ohlcDictionary.ohlc(degree)
-                        for i in range(len(lst)):
-                            print(lst[i], file=text_file)
-                        print("", file=text_file)
-
-
+        selection = indexes[0]
+        model.exportToFile(selection)
 
     def OnShowHistoricalView_Handler(self):
         if (self.historicalController):

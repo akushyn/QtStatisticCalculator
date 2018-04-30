@@ -149,7 +149,7 @@ class Ui_HistoricalDialog(object):
         self.btnFilter.setObjectName("btnFilter")
         self.vBoxFilter.addWidget(self.btnFilter, 0, QtCore.Qt.AlignHCenter)
         self.verticalLayout_5.addLayout(self.vBoxFilter)
-        self.vBoxRightDownload.addWidget(self.groupBoxFilter, 0, QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.vBoxRightDownload.addWidget(self.groupBoxFilter)
         self.horizontalLayout_4.addLayout(self.vBoxRightDownload)
         self.horizontalLayout_4.setStretch(0, 1)
         self.horizontalLayout_4.setStretch(1, 4)

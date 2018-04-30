@@ -1,8 +1,13 @@
 import sys
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
+
+from src.controllers.akImportPreviewController import AkImportPreviewController
 from src.controls.akFileDialog import AkFileDialog
-from src.models.akTableModel import AkInstrumentOHLCModel
+from src.data.akInstrument import AkInstrument
+from src.data.akNode import AkNode
+from src.models.akListModel import AkInstrumentListModel
+from src.models.akTableModel import AkInstrumentTableModel
 from src.views.ui_historicalView import Ui_HistoricalDialog
 import src.Functions as func
 import csv
@@ -78,13 +83,27 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
             names = dialog.selectedFiles()
         try:
             if (names):
+                importedFiles = []
+                nodes = []
                 for i in range(len(names)):
                     name = names[i]
                     headers, data = func.loadCSV(name)
-                    ohlcTable = AkInstrumentOHLCModel(func.getShortName(name), data, headers)
-                    if(ohlcTable):
-                        self.model.insertRows(0, 1, [ohlcTable])
-        except IndexError as e:
+                    instrumentData = AkInstrumentTableModel(func.getShortName(name), data, headers)
+                    instrument = AkInstrument(name=func.getShortName(name), data=instrumentData, parent=None)
+
+                    importedFiles.append(instrumentData)
+                    nodes.append(instrument)
+
+                if (importedFiles):
+
+                    previewModel = AkInstrumentListModel(importedFiles, ["Instruments"])
+                    self.model.insertRows(0, len(importedFiles), importedFiles)
+                    #self._importPreviewController.listViewImportedFiles.setModel(previewModel)
+
+        #if (instrument):
+         #   self.model.insertRows(0, 1, [ohlcTable])
+
+        except Exception as e:
             print("Invalid format:", sys.exc_info()[0])
             QMessageBox.warning(self, "Invalid .csv format", "The file, you've tried to import has invalid format.", QMessageBox.Ok)
 

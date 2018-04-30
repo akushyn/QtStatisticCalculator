@@ -181,7 +181,7 @@
            <item>
             <widget class="AkTableView" name="ohlcTableView"/>
            </item>
-           <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+           <item>
             <widget class="QGroupBox" name="groupBoxFilter">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
