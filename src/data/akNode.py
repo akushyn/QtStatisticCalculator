@@ -1,5 +1,3 @@
-from enum import Enum
-
 class AkNode(object):
     def __init__(self, name, parent=None):
 
@@ -10,7 +8,7 @@ class AkNode(object):
         if parent is not None:
             parent.addChild(self)
 
-    def typeInfo(self):
+    def typeNode(self):
         return "NODE"
 
     def addChild(self, child):

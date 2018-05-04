@@ -12,6 +12,7 @@ class AkTableView(QtWidgets.QTableView):
         self.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.clicked.connect(self.OnTable_clickHandler)
 
+
     def OnPopupMenu_Handler(self, position):
         pass
         #menu = QtWidgets.QMenu()

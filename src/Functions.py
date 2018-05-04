@@ -17,6 +17,22 @@ def getShortName(pathFileName):
     return os.path.splitext(os.path.basename(pathFileName))[0]
 
 
+def max(ohlcTable):
+    max = ohlcTable[0][2] # High[0]
+    for row in ohlcTable:
+        if (float(row[2]) > float(max)):
+            max = row[2]
+
+    return max
+
+def min(ohlcTable):
+    min = ohlcTable[0][3] # High[0]
+    for row in ohlcTable:
+        if (float(row[3]) < float(min)):
+            min = row[3]
+
+    return min
+
 def getDistributionList():
     global highLow, highClose, openHigh, openLow, lowClose, data, distributions
 

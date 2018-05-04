@@ -114,7 +114,7 @@ class AkSeriality(object):
 
 
         if (parent is not None):
-            self._name = parent.getName()
+            self._name = parent.name()
         else:
             self._name = ''
 

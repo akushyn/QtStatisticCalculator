@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1097</width>
+    <width>983</width>
     <height>581</height>
    </rect>
   </property>
@@ -71,7 +71,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QListView" name="instrumentsListView"/>
+           <widget class="AkTreeView" name="instrumentsTreeView"/>
           </item>
          </layout>
         </widget>
@@ -95,22 +95,99 @@
           <attribute name="title">
            <string>Summary</string>
           </attribute>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <layout class="QVBoxLayout" name="verticalLayout_11">
            <item>
-            <widget class="QTreeView" name="instrumentsTreeView"/>
-           </item>
-           <item>
-            <widget class="QTableView" name="ohlcTableView">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>4</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-              <bool>false</bool>
-             </attribute>
-            </widget>
+            <layout class="QVBoxLayout" name="verticalLayout_10" stretch="1,0">
+             <item>
+              <widget class="QSplitter" name="splitter_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <widget class="QWidget" name="">
+                <layout class="QVBoxLayout" name="verticalLayout_5">
+                 <property name="spacing">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelOLHC">
+                   <property name="styleSheet">
+                    <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+                   </property>
+                   <property name="text">
+                    <string>OLHC Table</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTableView" name="olhcTableView">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>4</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+                    <bool>false</bool>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="">
+                <layout class="QVBoxLayout" name="verticalLayout_9">
+                 <property name="spacing">
+                  <number>10</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>5</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelOHLC">
+                   <property name="styleSheet">
+                    <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+                   </property>
+                   <property name="text">
+                    <string>OHLC Table</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QTableView" name="ohlcTableView">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>4</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+                    <bool>false</bool>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelUndetermined">
+               <property name="styleSheet">
+                <string notr="true">font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -386,7 +463,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1097</width>
+     <width>983</width>
      <height>21</height>
     </rect>
    </property>
@@ -554,6 +631,11 @@
    <class>AkTableView</class>
    <extends>QTableView</extends>
    <header>src.controls.akTableView</header>
+  </customwidget>
+  <customwidget>
+   <class>AkTreeView</class>
+   <extends>QTreeView</extends>
+   <header>src.controls.akTreeView</header>
   </customwidget>
  </customwidgets>
  <tabstops>

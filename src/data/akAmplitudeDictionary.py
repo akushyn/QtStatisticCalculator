@@ -19,7 +19,7 @@ class AkAmplitudeDictionary(object):
         self._dates = []
 
         if (parent is not None):
-            self._name = parent.getName()
+            self._name = parent.name()
 
     def getName(self):
         return self._name

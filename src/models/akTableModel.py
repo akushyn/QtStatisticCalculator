@@ -1,8 +1,6 @@
 from PyQt5 import QtCore, QtGui
-
 from src.data.akAmplitudeDictionary import AkAmplitudeDictionary
 from src.data.akSeriality import AkSeriality
-
 
 class AkTableModel(QtCore.QAbstractTableModel):
     __defaultHeaders = ["Date", "Open", "High", "Low", "Close"]
@@ -12,7 +10,7 @@ class AkTableModel(QtCore.QAbstractTableModel):
         self._items = items
         self._headers = headers
 
-    def getName(self):
+    def name(self):
         return self.__name
 
     def setName(self, name):
@@ -112,12 +110,13 @@ class AkInstrumentTableModel(AkTableModel):
     def __init__(self, name = '', items=[[]], headers=[], parent=None):
         super(AkInstrumentTableModel, self).__init__(name, items, headers, parent)
         self._items = items
+
         self._seriality = AkSeriality(ohlcData=items, parent=self)
         self._amplitude = AkAmplitudeDictionary(ohlcData=items, parent=self)
-        #self._amplitude = AkAmplitude(self.getName(), items)
+        #self._amplitude = AkAmplitude(self.name(), items)
 
     def distributionTable(self):
-        print(self.getName())
+        print(self.name())
 
     def filter(self, fromDate, toDate):
         position = -1
@@ -147,7 +146,7 @@ class AkInstrumentTableModel(AkTableModel):
 
 
     def exportToFile(self, pathFileName=''):
-        fileName = 'export_' + pathFileName + self.getName() + '.txt'
+        fileName = 'export_' + pathFileName + self.name() + '.txt'
         seriality = self.getSeriality()
         serialityIndexes =  seriality.getSerialityIndexesDictionary()
 
@@ -155,7 +154,7 @@ class AkInstrumentTableModel(AkTableModel):
         datesDictionary = seriality.getSerialityStartDatesDictionary()
 
         with open(fileName, "w") as text_file:
-            print("Instrument:", self.getName(), file=text_file)
+            print("Instrument:", self.name(), file=text_file)
             print("----------------------------------------------------------------------------------------------------", file=text_file)
             print("Sequence: ", seriality.getSerialitySequenceList(), file=text_file)
             print("Min: ", min(serialityIndexes.keys()), file=text_file)

@@ -1,21 +1,21 @@
+import csv
 import sys
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
-from src.controllers.akImportPreviewController import AkImportPreviewController
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QDir
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QFileSystemModel
+
+import src.Functions as func
 from src.controls.akFileDialog import AkFileDialog
 from src.data.akInstrument import AkInstrument
-from src.data.akNode import AkNode
-from src.models.akListModel import AkInstrumentListModel
 from src.models.akTableModel import AkInstrumentTableModel
 from src.views.ui_historicalView import Ui_HistoricalDialog
-import src.Functions as func
-import csv
+
 
 class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
     def __init__(self, model=None):
         super(AkHistoricalController, self).__init__()
-        self.model = model
+        self._model = model
         self.setupUi()
 
         self.setupConnections()
@@ -25,9 +25,9 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
         super(AkHistoricalController, self).setupUi(self)
 
         self.setModal(True)
-        self.btnFilter.setEnabled(False)
         self.setWindowTitle("Historical Data Manager")
         self.dateEnd.setDate(QtCore.QDate.currentDate())
+        self.btnFilter.setEnabled(False)
 
         self.btnImport.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.btnImport.customContextMenuRequested.connect(self.OnContextMenuImportButton_clickHandler)
@@ -38,12 +38,25 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
     # ---------------------------------------------------------------------
 
     def setupModel(self):
-        self.listViewImported.setModel(self.model)
+        self.treeViewImported.setModel(self._model)
+
+        fileName = "G:/Programming/Projects/QtStatisticCalculator/src/resources/^spx_y.csv"
+        name = func.getShortName(fileName)
+        headers, data = func.loadCSV(fileName)
+        instrument = AkInstrument(name=name, items=data, headers=headers)
+        self._model.insertRows(0, 1, [instrument])
+
+        fileSystemModel = QFileSystemModel()
+        fileSystemModel.setRootPath(QDir.currentPath())
+
+        self.treeViewWindowFiles.setModel(fileSystemModel)
+        #self.treeViewWindowFiles.setRootIndex(fileSystemModel.index(QDir.currentPath()))
+
 
     def setupConnections(self):
         self.btnImport.clicked.connect(self.OnImportButton_click_Handler)
         self.btnFilter.clicked.connect(self.OnFilterButton_clickHandler)
-        self.listViewImported.clicked.connect(self.OnListView_clickHandler)
+        self.treeViewImported.clicked.connect(self.OnTreeView_clickHandler)
         self.toolButtonDelete.clicked.connect(self.OnToolButtonDelete_clickHandler)
         self.toolButtonClearAll.clicked.connect(self.OnToolButtonClearAll_clickHandler)
 
@@ -70,54 +83,61 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
         pass
 
 
-    def OnListView_clickHandler(self, index):
-        data = self.listViewImported.model().itemData(index)
-        if (data):
+    def OnTreeView_clickHandler(self, index):
+        index = self.treeViewImported.selectedIndexes()[0]
+        model = index.model()
+        item = model.getNode(index)
+
+        if (item.typeNode() == 'PERIOD'):
+            self.ohlcTableView.setModel(item)
+            self.ohlcTableView.verticalHeader().setVisible(True)
+        else:
+            self.ohlcTableView.verticalHeader().setVisible(False)
+            self.ohlcTableView.setModel(AkInstrumentTableModel())
+
+        if (self.ohlcTableView.model() is not None) and (self.ohlcTableView.model().rowCount() > 1):
             self.btnFilter.setEnabled(True)
-        self.ohlcTableView.setModel(data)
+        else:
+            self.btnFilter.setEnabled(False)
 
     def OnImportButton_click_Handler(self):
         dialog = AkFileDialog()
-        names = []
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            names = dialog.selectedFiles()
-        try:
-            if (names):
-                importedFiles = []
-                nodes = []
-                for i in range(len(names)):
-                    name = names[i]
-                    headers, data = func.loadCSV(name)
-                    instrumentData = AkInstrumentTableModel(func.getShortName(name), data, headers)
-                    instrument = AkInstrument(name=func.getShortName(name), data=instrumentData, parent=None)
 
-                    importedFiles.append(instrumentData)
-                    nodes.append(instrument)
+        selectedFiles = []
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            selectedFiles = dialog.selectedFiles()
+        try:
+            if (selectedFiles):
+                importedFiles = []
+                for i in range(len(selectedFiles)):
+                    selectedFile = selectedFiles[i]
+                    headers, data = func.loadCSV(selectedFile)
+                    #instrumentData = AkInstrumentTableModel(func.getShortName(selectedFile), data, headers)
+                    instrument = AkInstrument(name=func.getShortName(selectedFile), items=data, headers=headers, parent=None)
+
+                    importedFiles.append(instrument)
 
                 if (importedFiles):
-
-                    previewModel = AkInstrumentListModel(importedFiles, ["Instruments"])
-                    self.model.insertRows(0, len(importedFiles), importedFiles)
-                    #self._importPreviewController.listViewImportedFiles.setModel(previewModel)
-
-        #if (instrument):
-         #   self.model.insertRows(0, 1, [ohlcTable])
-
+                    self._model.insertRows(0, len(importedFiles), importedFiles)
         except Exception as e:
             print("Invalid format:", sys.exc_info()[0])
             QMessageBox.warning(self, "Invalid .csv format", "The file, you've tried to import has invalid format.", QMessageBox.Ok)
 
+    def reduce(self):
+        print("reducing")
+
     def OnFilterButton_clickHandler(self):
-        fromDate = self.dateStart.date()
-        toDate = self.dateEnd.date()
+        model = self.ohlcTableView.model()
 
-        reply = QMessageBox.warning(self, "Confirmation", "Are you sure you want to filter data? \nChanges can't be prevented.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if (model is not None) and (model.rowCount() > 1):
+            fromDate = self.dateStart.date()
+            toDate = self.dateEnd.date()
 
-        # filter model data
-        if reply == QMessageBox.Yes:
-            self.ohlcTableView.model().filter(fromDate, toDate)
+            reply = QMessageBox.warning(self, "Confirmation", "Are you sure you want to filter data? \nChanges can't be prevented.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
-
+            # filter model data
+            if reply == QMessageBox.Yes:
+                self.ohlcTableView.model().filter(fromDate, toDate)
 
 
 
@@ -149,12 +169,12 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
     def writeCSV(self, fileName):
         with open(fileName, "wb") as fileOutput:
             writer = csv.writer(fileOutput)
-            for rowNumber in range(self.model.rowCount()):
+            for rowNumber in range(self._model.rowCount()):
                 fields = [
-                    self.model.data(
-                        self.model.index(rowNumber, columnNumber),
+                    self._model.data(
+                        self._model.index(rowNumber, columnNumber),
                         QtCore.Qt.DisplayRole
                     )
-                    for columnNumber in range(self.model.columnCount())
+                    for columnNumber in range(self._model.columnCount())
                 ]
                 writer.writerow(fields)

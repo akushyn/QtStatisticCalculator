@@ -26,68 +26,53 @@
       <attribute name="title">
        <string>Import</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <layout class="QHBoxLayout" name="hBoxMainImport" stretch="1,2">
-         <item>
-          <layout class="QVBoxLayout" name="vBoxLabels">
+        <widget class="QSplitter" name="splitter">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="QTreeView" name="treeViewWindowFiles"/>
+         <widget class="QWidget" name="">
+          <layout class="QVBoxLayout" name="verticalLayout_4">
            <property name="spacing">
-            <number>30</number>
-           </property>
-           <property name="leftMargin">
-            <number>30</number>
-           </property>
-           <property name="topMargin">
-            <number>22</number>
-           </property>
-           <property name="rightMargin">
-            <number>30</number>
-           </property>
-           <item alignment="Qt::AlignLeft">
-            <widget class="QLabel" name="labelInputFormat">
-             <property name="text">
-              <string>Data Input Format: </string>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignLeft">
-            <widget class="QLabel" name="labelTimeZone">
-             <property name="text">
-              <string>Time zone of imported data: </string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="vBoxLeftImport">
-           <property name="spacing">
-            <number>25</number>
-           </property>
-           <property name="topMargin">
             <number>15</number>
            </property>
-           <property name="rightMargin">
-            <number>30</number>
+           <property name="leftMargin">
+            <number>10</number>
+           </property>
+           <property name="topMargin">
+            <number>10</number>
            </property>
            <item>
-            <widget class="QComboBox" name="comboInputFormat"/>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboTimeZone"/>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="labelInputFormat">
+               <property name="text">
+                <string>Data Input Format: </string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="labelTimeZone">
+               <property name="text">
+                <string>Time zone of imported data: </string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="comboTimeZone"/>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="comboInputFormat"/>
+             </item>
+            </layout>
            </item>
            <item alignment="Qt::AlignLeft">
             <widget class="QPushButton" name="btnImport">
@@ -110,8 +95,8 @@
             </spacer>
            </item>
           </layout>
-         </item>
-        </layout>
+         </widget>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -165,7 +150,7 @@
             </layout>
            </item>
            <item>
-            <widget class="QListView" name="listViewImported"/>
+            <widget class="AkTreeView" name="treeViewImported"/>
            </item>
           </layout>
          </item>
@@ -281,6 +266,11 @@
    <class>AkTableView</class>
    <extends>QTableView</extends>
    <header>src.controls.akTableView</header>
+  </customwidget>
+  <customwidget>
+   <class>AkTreeView</class>
+   <extends>QTreeView</extends>
+   <header>src.controls.akTreeView</header>
   </customwidget>
  </customwidgets>
  <resources>

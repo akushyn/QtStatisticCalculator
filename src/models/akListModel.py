@@ -23,13 +23,13 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
 
     def data(self, index, role=None):
         if (role == QtCore.Qt.ToolTipRole):
-            return self._items[index.row()].getName()
+            return self._items[index.row()].name()
 
         if (role == QtCore.Qt.DisplayRole):
-            return self._items[index.row()].getName()
+            return self._items[index.row()].name()
 
         if (role == QtCore.Qt.EditRole):
-            return self._items[index.row()].getName()
+            return self._items[index.row()].name()
 
 
     def flags(self, QModelIndex):

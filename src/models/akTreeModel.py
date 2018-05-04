@@ -89,7 +89,7 @@ class AkInstrumentGraphModel(QtCore.QAbstractItemModel):
 
         for row in range(rows):
             childCount = parentNode.childCount()
-            childNode = nodes[row]#AkNode("untitled" + str(childCount))
+            childNode = nodes[row]
             success = parentNode.insertChild(position, childNode)
 
         self.endInsertRows()
@@ -115,25 +115,5 @@ class AkInstrumentGraphModel(QtCore.QAbstractItemModel):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
 
-    rootNode = AkNode("Instruments")
-    childNode0 = AkInstrumentNode("EURUSD", rootNode)
-    childNode1 = AkInstrumentNode("GBPUSD", rootNode)
-    childNode2 = AkInstrumentNode("GOLD", rootNode)
-
-    childNode3 = AkSectionNode("Day", childNode0)
-    childNode4 = AkSectionNode("Week", childNode0)
-    childNode5 = AkSectionNode("Month", childNode0)
-
-    childNode6 = AkSectionNode("Week", childNode1)
-    childNode7 = AkSectionNode("Month", childNode1)
-
-    print(rootNode)
-
-    model = AkInstrumentGraphModel(rootNode)
-
-    treeView = QtWidgets.QTreeView()
-    treeView.show()
-
-    treeView.setModel(model)
 
     sys.exit(app.exec_())
