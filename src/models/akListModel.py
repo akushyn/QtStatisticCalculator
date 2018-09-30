@@ -1,36 +1,27 @@
 from PyQt5 import QtCore
-from src.models.akTableModel import AkInstrumentTableModel
-
 
 class AkInstrumentListModel(QtCore.QAbstractListModel):
-    DEFAULT_NAME = "NAME_"
+    """
+    Instrument list model - list of instruments.
+    """
 
-    # items of 'AkInstrument()'
-    def __init__(self, items = [], headers = [], parent = None):
+    def __init__(self, instruments = [], parent = None):
         super(AkInstrumentListModel, self).__init__(parent)
-        self._items = items
-        self._headers = headers
+        self._instruments = instruments
 
-    def rowCount(self, parent):
-        return len(self._items)
+    def rowCount(self, parent=QtCore.QModelIndex()):
+        return len(self._instruments)
 
     def headerData(self, section, orientation, role=None):
         if (role == QtCore.Qt.DisplayRole):
-            if (orientation == QtCore.Qt.Horizontal):
-                return self._headers(section)
+            if (orientation == QtCore.Qt.Vertical):
+                return "Instruments"
             else:
                 return QtCore.QVariant(section)
 
     def data(self, index, role=None):
-        if (role == QtCore.Qt.ToolTipRole):
-            return self._items[index.row()].name()
-
-        if (role == QtCore.Qt.DisplayRole):
-            return self._items[index.row()].name()
-
-        if (role == QtCore.Qt.EditRole):
-            return self._items[index.row()].name()
-
+        if (role == QtCore.Qt.ToolTipRole) or (role == QtCore.Qt.DisplayRole) or (role == QtCore.Qt.EditRole):
+            return self._instruments[index.row()].name()
 
     def flags(self, QModelIndex):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
@@ -40,7 +31,7 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
         if (role == QtCore.Qt.EditRole):
             row = index.row()
 
-            self._items[row].setName(value)
+            self._instruments[row].setName(value)
             self.dataChanged.emit(index, index)
             return True
 
@@ -49,25 +40,14 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
 
         return False
 
-    def setItemData(self, index, data, p_int=None, Any=None):
-        self._items[index] = data
-        #self._items[index].dataChanged.emit(index, index)
-
     def itemData(self, index):
-        return self._items[index.row()]
+        return self._instruments[index.row()]
 
-    def insertRows(self, position, rows, values = [], parent=QtCore.QModelIndex()):
+    def insertRows(self, position, rows, instruments = [], parent=QtCore.QModelIndex()):
         self.beginInsertRows(parent, position, position + rows - 1)
 
-        if (not values):
-            for i in range(rows):
-                it = AkInstrumentTableModel(self.DEFAULT_NAME)
-                self._items.insert(position, it)
-                self.setItemData(i, it.data())
-        else:
-            for i in range(rows):
-                self._items.insert(position, values[i])
-                self.setItemData(i, values[i])
+        for i in range(rows):
+            self._instruments.insert(position, instruments[i])
 
         self.endInsertRows()
 
@@ -76,10 +56,7 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
         self.beginRemoveRows(parent, position, position + rows - 1)
 
         for i in range(rows):
-            it = self._items[position].modelReset()
-            self._items.remove(it)
+            inst = self._instruments[position].modelReset()
+            self._instruments.remove(inst)
 
         self.endRemoveRows()
-
-    def exportToFile(self, index):
-        self._items[index.row()].exportToFile()

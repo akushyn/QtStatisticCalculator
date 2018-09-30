@@ -6,15 +6,19 @@ class AkNode(object):
         self._parent = parent
 
         if parent is not None:
-            parent.addChild(self)
+            parent.add_child(self)
 
-    def typeNode(self):
+    @staticmethod
+    def type_node():
         return "NODE"
 
-    def addChild(self, child):
+    def add_child(self, child):
         self._children.append(child)
 
-    def insertChild(self, position, child):
+    def children(self):
+        return self._children
+
+    def insert_child(self, position, child):
 
         if position < 0 or position > len(self._children):
             return False
@@ -23,7 +27,7 @@ class AkNode(object):
         child._parent = self
         return True
 
-    def removeChild(self, position):
+    def remove_child(self, position):
 
         if position < 0 or position > len(self._children):
             return False
@@ -33,44 +37,45 @@ class AkNode(object):
 
         return True
 
-    def name(self):
+    def get_name(self):
         return self._name
 
-    def setName(self, name):
+    def set_name(self, name):
         self._name = name
 
     def child(self, row):
         return self._children[row]
 
-    def childCount(self):
+    def child_count(self):
         return len(self._children)
 
     def parent(self):
         return self._parent
 
-    def row(self):
-        if self._parent is not None:
-            return self._parent._children.index(self)
+    def grand_parent(self):
+        if self.parent() is not None:
+            return self.parent().parent()
 
-    def log(self, tabLevel=-1):
+        return None
+
+    def row(self):
+        if self.parent() is not None:
+            return self.parent().children().index(self)
+
+    def log(self, tab_level=-1):
 
         output = ""
-        tabLevel += 1
+        tab_level += 1
 
-        for i in range(tabLevel):
+        for i in range(tab_level):
             output += "\t"
 
         output += "|------" + self._name + "\n"
 
         for child in self._children:
-            output += child.log(tabLevel)
+            output += child.log(tab_level)
 
-        tabLevel -= 1
+        tab_level -= 1
         output += "\n"
 
         return output
-
-    #def __repr__(self):
-    #    return self.log()
-
-

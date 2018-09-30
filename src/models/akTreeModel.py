@@ -111,6 +111,8 @@ class AkInstrumentGraphModel(QtCore.QAbstractItemModel):
 
         return success
 
+    def exportToFile(self, index):
+        pass
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

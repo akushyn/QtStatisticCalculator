@@ -8,10 +8,7 @@ class AkTableView(QtWidgets.QTableView):
         self.customContextMenuRequested.connect(self.OnPopupMenu_Handler)
 
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.verticalHeader().setVisible(True)
         self.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        self.clicked.connect(self.OnTable_clickHandler)
-
 
     def OnPopupMenu_Handler(self, position):
         pass
@@ -30,4 +27,4 @@ class AkTableView(QtWidgets.QTableView):
             self.model().removeRows(pos, rows)
 
     def OnTable_clickHandler(self, index):
-        pass
+        print('clicked')

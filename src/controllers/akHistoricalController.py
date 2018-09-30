@@ -4,11 +4,10 @@ import sys
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import QMessageBox, QFileDialog, QFileSystemModel
-
-import src.Functions as func
+from src.akFunctions import AkFunctions
 from src.controls.akFileDialog import AkFileDialog
 from src.data.akInstrument import AkInstrument
-from src.models.akTableModel import AkInstrumentTableModel
+from src.data.akPeriod import AkPeriod
 from src.views.ui_historicalView import Ui_HistoricalDialog
 
 
@@ -29,59 +28,49 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
         self.dateEnd.setDate(QtCore.QDate.currentDate())
         self.btnFilter.setEnabled(False)
 
-        self.btnImport.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.btnImport.customContextMenuRequested.connect(self.OnContextMenuImportButton_clickHandler)
-
-
     #----------------------------------------------------------------------
     # Private methods
     # ---------------------------------------------------------------------
 
     def setupModel(self):
-        self.treeViewImported.setModel(self._model)
+        self.listViewImported.setModel(self._model)
 
-        fileName = "G:/Programming/Projects/QtStatisticCalculator/src/resources/^spx_y.csv"
-        name = func.getShortName(fileName)
-        headers, data = func.loadCSV(fileName)
-        instrument = AkInstrument(name=name, items=data, headers=headers)
-        self._model.insertRows(0, 1, [instrument])
+        fileName = "G:/Programming/Projects/QtStatisticCalculator/^spx_y_test.csv"
+        name = AkFunctions.getShortName(fileName)
+        headers, data = AkFunctions.loadCSV(fileName)
+        xPeriod = AkPeriod(1, data, headers=headers)
+
+        instrument = AkInstrument(name, [xPeriod])
+        self._model.insertRows(0, len([instrument]), [instrument])
 
         fileSystemModel = QFileSystemModel()
+        fileSystemModel.setFilter(QDir.AllDirs | QDir.NoDotAndDotDot | QDir.AllEntries)
+
+        filters = ["*.csv"]
+        fileSystemModel.setNameFilters(filters)
+        fileSystemModel.setNameFilterDisables(False)
+
         fileSystemModel.setRootPath(QDir.currentPath())
 
         self.treeViewWindowFiles.setModel(fileSystemModel)
+        self.treeViewWindowFiles.hideColumn(1)
+        self.treeViewWindowFiles.hideColumn(2)
+        self.treeViewWindowFiles.hideColumn(3)
         #self.treeViewWindowFiles.setRootIndex(fileSystemModel.index(QDir.currentPath()))
 
 
     def setupConnections(self):
-        self.btnImport.clicked.connect(self.OnImportButton_click_Handler)
+        self.btnImport.clicked.connect(self.onImportButton_click_Handler)
         self.btnFilter.clicked.connect(self.OnFilterButton_clickHandler)
-        self.treeViewImported.clicked.connect(self.OnTreeView_clickHandler)
-        self.toolButtonDelete.clicked.connect(self.OnToolButtonDelete_clickHandler)
-        self.toolButtonClearAll.clicked.connect(self.OnToolButtonClearAll_clickHandler)
+        self.listViewImported.clicked.connect(self.onListViewImported_clickHandler)
 
     #----------------------------------------------------------------------
     # Event handlers
     # ---------------------------------------------------------------------
-    def OnContextMenuImportButton_clickHandler(self):
-        print("context")
 
-    def OnToolButtonDelete_clickHandler(self):
-        pass
-        #indexes = self.listViewImported.selectionModel().selectedRows()
-        #if (indexes):
-
-        #    reply = QMessageBox.question(self, "Confirmation", "Delete selected?",
-        #                                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        #    if reply == QMessageBox.Yes:
-        #        pos = indexes[0].row()
-        #        rows = len(indexes)
-        #        self.listViewImported.model().removeRows(pos, rows)
-
-    def OnToolButtonClearAll_clickHandler(self):
-        pass
-
+    def onListViewImported_clickHandler(self):
+        index = self.listViewImported.selectedIndexes()[0]
+        model = index.model()
 
     def OnTreeView_clickHandler(self, index):
         index = self.treeViewImported.selectedIndexes()[0]
@@ -100,7 +89,7 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
         else:
             self.btnFilter.setEnabled(False)
 
-    def OnImportButton_click_Handler(self):
+    def onImportButton_click_Handler(self):
         dialog = AkFileDialog()
 
         selectedFiles = []
@@ -111,10 +100,10 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
                 importedFiles = []
                 for i in range(len(selectedFiles)):
                     selectedFile = selectedFiles[i]
-                    headers, data = func.loadCSV(selectedFile)
-                    #instrumentData = AkInstrumentTableModel(func.getShortName(selectedFile), data, headers)
-                    instrument = AkInstrument(name=func.getShortName(selectedFile), items=data, headers=headers, parent=None)
+                    headers, data = AkFunctions.loadCSV(selectedFile)
 
+                    xPeriod = AkPeriod(1, data, headers=headers)
+                    instrument = AkInstrument(AkFunctions.getShortName(selectedFile), [xPeriod])
                     importedFiles.append(instrument)
 
                 if (importedFiles):

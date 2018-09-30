@@ -1,130 +1,188 @@
-from src.data.akNode import AkNode
-from src.models.akTableModel import AkInstrumentTableModel
-import src.Functions as func
-
-class AkInstrument(AkNode, AkInstrumentTableModel):
-    def __init__(self, name, items=[[]], headers=[], parent=None):
-        AkNode.__init__(self, name, parent)
-        AkInstrumentTableModel.__init__(self, name, items, headers, parent)
-
-        self._items = items
-        self.setupPeriods()
-
-    def setupPeriods(self):
-        self._daySection = AkSection("periods", self)
-
-        for i in range(1, len(self._items) + 1):
-            ohlc, olhc, undetermined = self.undeterminedAnalysis(i)
-            AkPeriod(name='D' + str(i), ohlcItems=ohlc, olhcItems=olhc, undetermined=undetermined, parent=self._daySection)
-
-            with open('D' + str(i) + '.txt', "w") as text_file:
-                print('Instrument: ', self.name(), file=text_file)
-                print('Period =', i, file=text_file)
-                print('', file=text_file)
-
-                print('OHLC:', file=text_file)
-                self.display(ohlc, file=text_file)
-
-                print('', file=text_file)
-                print('OLHC:', file=text_file)
-                self.display(olhc, file=text_file)
-
-                print('', file=text_file)
-                print('Undetermined:', file=text_file)
-                self.display(undetermined, file=text_file)
-
-    def undeterminedAnalysis(self, period):
-        ohlc = []
-        olhc = []
-        undetermined = []
-
-        # length of base table - D1
-        length = len(self._items)
-
-        for i in range(length - period + 1):
-            items = self._items[i:i + period]
-
-            max = items[0][2]
-            maxIdx = 0
-
-            min = items[0][3]
-            minIdx = 0
-            for j in range(1,len(items)):
-                if (float(items[j][2]) > float(max)):
-                    max = items[j][2]
-                    maxIdx = j
-                elif (float(items[j][3]) < float(min)):
-                    min = items[j][3]
-                    minIdx = j
-
-            row = self.folding(items)
-
-            if (minIdx > maxIdx):
-               ohlc.append(row)
-            elif (maxIdx > minIdx):
-                olhc.append(row)
-            else:
-                undetermined.append(row)
-
-        return ohlc, olhc, undetermined
+from src.akFunctions import AkFunctions
+from src.data.akAnalysis import AkAnalysisFactory
+from src.data.akEnums import AkSelectionMethod
+from src.data.akPeriod import AkPeriod
+from src.data.export.akExport import AkExport
+from typing import IO
 
 
-    def folding(self, items):
-        date = items[len(items) - 1][0]
-        open = items[0][1]
-        high = func.max(items)
-        low = func.min(items)
-        close = items[len(items)-1][4]
+class AkInstrument(object):
+    """
+    Реалізація класу ІНСТРУМЕНТ
+    """
+    def __init__(self, name, sources, analysis_types=list(), period_values=list(), method=AkSelectionMethod.CC,
+                 precision=3):
+        """
+        Ініціалізація екземпляру класу ІНСТРУМЕНТ.
 
-        row = []
-        row.append(date)
-        row.append(open)
-        row.append(high)
-        row.append(low)
-        row.append(close)
+        :param name: str(). Ім"я інструменту.
+        :param sources: [x_data, x_data,...]. Список даних інструменту.
+        """
 
-        return row
+        # ім"я інструмента
+        self._name = name
 
-    def display(self, list, file=None):
-        if (list == []):
-            print('[]', file=file)
+        # список базових періодів, завантажених зовні
+        self._sources = sources
 
-        for row in list:
-            print(row, file=file)
+        # список типів аналізу інструмента
+        self._analyzes = []
 
-    def typeNode(self):
-        return "INSTRUMENT"
+        # метод селекції даних інструмента
+        self._method = method
 
-class AkSection(AkNode):
-    def __init__(self, name, parent=None):
-        super(AkSection, self).__init__(name, parent)
+        # точність обрахунків для інструмента
+        self._precision = precision
 
-    def typeNode(self):
-        return "SECTION"
+        # список типів аналізу
+        self._analysis_types = analysis_types
 
-class AkPeriod(AkNode):
-    __defaultHeaders = ["Date", "Open", "High", "Low", "Close"]
-    def __init__(self, name, ohlcItems=[[]], olhcItems=[[]], undetermined=[[]], headers=__defaultHeaders, parent=None):
-        super(AkPeriod, self).__init__(name, parent)
+        # список значень періодів для аналізу
+        self._period_values = period_values
 
-        self._ohlcModel = AkInstrumentTableModel(name, ohlcItems, headers, None)
-        self._olhcModel = AkInstrumentTableModel(name, olhcItems, headers, None)
-        self._undeterminedModel = AkInstrumentTableModel(name, undetermined, headers, None)
+    @property
+    def name(self):
+        """
+        Метод повертає ім"я інструмента.
 
-    def ohlcModel(self):
-        return self._ohlcModel
+        :return: str()
+        """
+        return self._name
 
-    def olhcModel(self):
-        return self._olhcModel
+    @name.setter
+    def name(self, name):
+        """
+        Метод встановлює ім"я інструмента.
 
-    def undeterminedModel(self):
-        return self._undeterminedModel
+        :param name: str()
+        """
+        self._name = name
 
-    def typeNode(self):
-        return "PERIOD"
+    @property
+    def analysis_types(self):
+        """
+        Метод повертає список типів аналізу інструмента.
 
-if __name__ == '__main__':
-    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        :return: [AkAnalysisType(),...]
+        """
+        return self._analysis_types
 
-    period = 4
+    @analysis_types.setter
+    def analysis_types(self, analysis_types):
+        """
+        Метод встановлює список типів аналізу інструмента.
 
+        :param analysis_types: [AkAnalysisType(),...]
+        """
+
+        self._analysis_types = analysis_types
+
+    @property
+    def period_values(self):
+        """
+        Метод повертає список значень періодів для аналізу інструмента.
+        :return: [int, int,...]
+        """
+        if self._period_values:
+            return self._period_values
+        else:
+            for source in self._sources:
+                self._period_values = list(range(1, len(source)))
+
+        return self._period_values
+
+    @period_values.setter
+    def period_values(self, period_values):
+        """
+        Метод встановлює список значень періодів для аналізу інструмента.
+        :param period_values: [int, ...]
+        """
+        self._period_values = period_values
+
+    @property
+    def analyzes(self):
+        """
+        Метод повертає список об"эктів аналізів інструмента.
+        :return: [AkAnalysis(), AkAnalysis()...]
+        """
+        return self._analyzes
+
+    @property
+    def method(self):
+        """
+        Метод повертає метод селекції даних для інструменту.
+        :return: AkSelectionMethod()
+        """
+        return self._method
+
+    @property
+    def precision(self):
+        """
+        Метод повертає точність обрахунків інструмента.
+        :return: int.
+        """
+        return self._precision
+
+    def add_analysis(self, analysis):
+        """
+        Метод додає новий вид аналізу до списку аналізів інструмента.
+
+        :param analysis: AkAnalysis()
+        """
+        if analysis and analysis not in self._analyzes:
+            self._analyzes.append(analysis)
+
+    @property
+    def sources(self):
+        """
+        Метод повертає список базових періодів інструмента.
+
+        :return: [x_data, ...]. Список даних DOHLC інструмента.
+        """
+        return self._sources
+
+    def add_source(self, source):
+        """
+        Метод додає новий базовий період інструмента.
+
+        :param source: дані DOHLC
+        """
+        self._sources.append(source)
+
+    def source_type(self):
+        source = self._sources[0]
+
+        return AkFunctions.dataType(source[0][0], source[1][0])
+
+    def calculate(self):
+        """
+        Вхідна точка обрахунків. Калькуляція необхідної інформація для інструмента.
+        """
+
+        for source in self._sources:
+            x_period = AkPeriod(1, source, instrument=self)
+
+            if not x_period.x_data:
+                raise Exception("Invalid source data.")
+
+            for analysis_type in self.analysis_types:
+                analysis = AkAnalysisFactory.create_analysis(analysis_type, self)
+
+                analysis.prepare_data(x_period)
+                analysis.do_analyze()
+
+                self.add_analysis(analysis)
+
+    def export_to_file(self, ext='.txt'):
+        for i in range(len(self._sources)):
+            for analysis in self.analyzes:
+                file_name = self.name + analysis.type().name + ext
+                with open(file_name, "w+") as text_file:  # type: IO[str]
+                    print('Instrument: ' + self.name, file=text_file)
+                    print("", file=text_file)
+                    print("Method: " + self.method.name, file=text_file)
+                    print("Precision: " + str(self.precision), file=text_file)
+                    AkExport.print_underline(len('Instrument: ' + self.name), "=", text_file=text_file)
+                    print('', file=text_file)
+
+                    analysis.export(text_file)

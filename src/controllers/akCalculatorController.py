@@ -1,29 +1,25 @@
+import numpy as np
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QMessageBox
 
-from src.Functions import loadCSV
 from src.controllers.akConnectActionController import AkConnectActionController, AkDisconnectActionController
 from src.controllers.akConnectionsController import AkConnectionsController
 from src.controllers.akHistoricalController import AkHistoricalController
 from src.controllers.akInstrumentsController import AkInstrumentsController
 from src.controllers.akOptionsController import AkOptionsController
-from src.data.akAmplitudeDictionary import AkAmplitudeDictionary, AkCalculationMode
-from src.data.akInstrument import AkInstrument
-from src.data.akNode import AkNode
+from src.data.akAnalizator import AkAnalizator
+from src.data.akAnalysis import AkAnalysisType
 from src.models.akListModel import AkInstrumentListModel
-from src.models.akTableModel import AkInstrumentTableModel, AkTableModel, AkNotesTableModel
-from src.models.akTreeModel import AkInstrumentGraphModel
 from src.views.ui_calculatorMainView import Ui_CalculatorMainView
-import numpy as np
-from src import Functions as func
+
 
 class AkCalculatorController(QtWidgets.QMainWindow, Ui_CalculatorMainView):
     def __init__(self):
         super(AkCalculatorController, self).__init__()
         self.setupUi()
 
-        self._setup_model()
-        self._setup_connections()
+        self.setupModel()
+        self.setupConnections()
         self._setup_controllers()
 
     #----------------------------------------------------------------------
@@ -38,12 +34,6 @@ class AkCalculatorController(QtWidgets.QMainWindow, Ui_CalculatorMainView):
         self.notesTableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.notesTableView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
 
-        self.ohlcTableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.ohlcTableView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-
-        self.olhcTableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.olhcTableView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-
         self.graphicsView.setTitle('My Graph')
         self.graphicsView.setLabel('bottom', 'X axis')
         self.graphicsView.setLabel('left', 'Y axis')
@@ -55,15 +45,12 @@ class AkCalculatorController(QtWidgets.QMainWindow, Ui_CalculatorMainView):
     # Private methods
     # ---------------------------------------------------------------------
 
-    def _setup_model(self):
-        self.notesTableModel = AkNotesTableModel()
-        self.notesTableView.setModel(self.notesTableModel)
+    def setupModel(self):
+        self.instrumentsListModel = AkInstrumentListModel()
+        self.instrumentsListView.setModel(self.instrumentsListModel)
 
-        rootNode = AkNode("Root")
-        self._instrumentsTreeModel = AkInstrumentGraphModel(rootNode, headers=["Instruments"])
-        self.instrumentsTreeView.setModel(self._instrumentsTreeModel)
 
-    def _setup_connections(self):
+    def setupConnections(self):
 
         # Main menu events
         #-----------------
@@ -76,13 +63,14 @@ class AkCalculatorController(QtWidgets.QMainWindow, Ui_CalculatorMainView):
         self.actionExit.triggered.connect(self.OnExitAppAction_Handler)
 
         self.btnOK.clicked.connect(self.OnAddNoteButtonClick_Handler)
-        self.instrumentsTreeView.clicked.connect(self.OnTreeView_clickHandler)
         self.notesTableView.clicked.connect(self.OnNotesTable_clickHandler)
         self.btnCalculate.clicked.connect(self.OnCalculateButton_clickHandler)
 
+        self.instrumentsListView.clicked.connect(self.onInstrumentListView_clickHandler)
+
     def _setup_controllers(self):
         self.instrumentsController = AkInstrumentsController()
-        self.historicalController = AkHistoricalController(self._instrumentsTreeModel)
+        self.historicalController = AkHistoricalController(self.instrumentsListModel)
         self.connectionsController = AkConnectionsController()
         self.connectActionController = AkConnectActionController()
         self.disconnectActionController = AkDisconnectActionController()
@@ -100,52 +88,35 @@ class AkCalculatorController(QtWidgets.QMainWindow, Ui_CalculatorMainView):
     # Event handlers
     # ---------------------------------------------------------------------
 
-    def OnInstrumentSelection_changedHandler(self):
-        print('OnInstrumentSelection_changedHandler')
-
-    def OnContextMenuButton_clickHandler(self):
-        pass
-
-    def OnTreeView_clickHandler(self, index):
-        index = self.instrumentsTreeView.selectedIndexes()[0]
-        model = index.model()
-        item = model.getNode(index)
-
-        if (item.typeNode() == 'PERIOD'):
-            if (item.ohlcModel().rowCount() > 0):
-                self.ohlcTableView.setModel(item.ohlcModel())
-                self.ohlcTableView.verticalHeader().setVisible(True)
-            else:
-                self.ohlcTableView.verticalHeader().setVisible(False)
-                self.ohlcTableView.setModel(AkInstrumentTableModel())
-
-            if (item.olhcModel().rowCount() > 0):
-                self.olhcTableView.setModel(item.olhcModel())
-                self.olhcTableView.verticalHeader().setVisible(True)
-            else:
-                self.olhcTableView.verticalHeader().setVisible(False)
-                self.olhcTableView.setModel(AkInstrumentTableModel())
-
-        else:
-            self.ohlcTableView.verticalHeader().setVisible(False)
-            self.ohlcTableView.setModel(AkInstrumentTableModel())
-
-            self.olhcTableView.verticalHeader().setVisible(False)
-            self.olhcTableView.setModel(AkInstrumentTableModel())
+    def onInstrumentListView_clickHandler(self):
+        indexes = self.instrumentsListView.selectionModel().selectedIndexes()
+        model = self.instrumentsListView.model()
+        if (indexes):
+            selection = indexes[0]
+            instrument = model.itemData(selection)
+            print(selection)
 
     def OnNotesTable_clickHandler(self, index):
         sellData = self.notesTableView.model().data(index, role=QtCore.Qt.DisplayRole)
         self.textNote.setPlainText(sellData)
 
     def OnCalculateButton_clickHandler(self):
-        indexes = self.instrumentsTreeView.selectionModel().selectedIndexes()
-        model = self.instrumentsTreeView.model()
+        indexes = self.instrumentsListView.selectionModel().selectedIndexes()
+
         if (not indexes):
             self.statusbar.showMessage("No instrument selected", 3000)
             return
 
+        instrumentListModel = self.instrumentsListView.model()
         selection = indexes[0]
-        model.exportToFile(selection)
+
+        instrument = instrumentListModel.itemData(selection)
+
+        analizator = AkAnalizator()
+        analizator.set_instrument(instrument)
+
+        analizator.setAnalysisTypes([AkAnalysisType.Series])
+        analizator.do_analyze()
 
     def OnShowHistoricalView_Handler(self):
         if (self.historicalController):
