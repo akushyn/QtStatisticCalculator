@@ -6,16 +6,17 @@ from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import QMessageBox, QFileDialog, QFileSystemModel
 from src.akFunctions import AkFunctions
 from src.controls.akFileDialog import AkFileDialog
+from src.data.akEnums import AkAnalysisType, AkSelectionMethod
 from src.data.akInstrument import AkInstrument
 from src.data.akPeriod import AkPeriod
 from src.views.ui_historicalView import Ui_HistoricalDialog
 
 
 class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
-    def __init__(self, model=None):
+    def __init__(self, parent_controller):
         super(AkHistoricalController, self).__init__()
-        self._model = model
         self.setupUi()
+        self._parent_controller = parent_controller
 
         self.setupConnections()
         self.setupModel()
@@ -25,23 +26,28 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
 
         self.setModal(True)
         self.setWindowTitle("Historical Data Manager")
-        self.dateEnd.setDate(QtCore.QDate.currentDate())
-        self.btnFilter.setEnabled(False)
+        self.date_end.setDate(QtCore.QDate.currentDate())
+        self.button_filter_data.setEnabled(False)
 
     #----------------------------------------------------------------------
     # Private methods
     # ---------------------------------------------------------------------
 
     def setupModel(self):
-        self.listViewImported.setModel(self._model)
+        self.list_view_imported_symbols.setModel(self._parent_controller.get_instruments_model())
 
         fileName = "G:/Programming/Projects/QtStatisticCalculator/^spx_y_test.csv"
         name = AkFunctions.getShortName(fileName)
         headers, data = AkFunctions.loadCSV(fileName)
         xPeriod = AkPeriod(1, data, headers=headers)
 
-        instrument = AkInstrument(name, [xPeriod])
-        self._model.insertRows(0, len([instrument]), [instrument])
+        #instrument = AkInstrument(name, [xPeriod])
+
+        analysis_list = [AkAnalysisType.Calendar, AkAnalysisType.Period, AkAnalysisType.Series]
+        instrument_ = AkInstrument(name, sources=[data], analysis_types=analysis_list, method=AkSelectionMethod.CC,
+                                   precision=3)
+
+        self._parent_controller.get_instruments_model().insertRows(0, len([instrument_]), [instrument_])
 
         fileSystemModel = QFileSystemModel()
         fileSystemModel.setFilter(QDir.AllDirs | QDir.NoDotAndDotDot | QDir.AllEntries)
@@ -52,17 +58,17 @@ class AkHistoricalController(QtWidgets.QDialog, Ui_HistoricalDialog):
 
         fileSystemModel.setRootPath(QDir.currentPath())
 
-        self.treeViewWindowFiles.setModel(fileSystemModel)
-        self.treeViewWindowFiles.hideColumn(1)
-        self.treeViewWindowFiles.hideColumn(2)
-        self.treeViewWindowFiles.hideColumn(3)
+        self.tree_view_windows_files.setModel(fileSystemModel)
+        self.tree_view_windows_files.hideColumn(1)
+        self.tree_view_windows_files.hideColumn(2)
+        self.tree_view_windows_files.hideColumn(3)
         #self.treeViewWindowFiles.setRootIndex(fileSystemModel.index(QDir.currentPath()))
 
 
     def setupConnections(self):
-        self.btnImport.clicked.connect(self.onImportButton_click_Handler)
-        self.btnFilter.clicked.connect(self.OnFilterButton_clickHandler)
-        self.listViewImported.clicked.connect(self.onListViewImported_clickHandler)
+        self.button_import_data.clicked.connect(self.onImportButton_click_Handler)
+        self.button_filter_data.clicked.connect(self.OnFilterButton_clickHandler)
+        self.list_view_imported_symbols.clicked.connect(self.onListViewImported_clickHandler)
 
     #----------------------------------------------------------------------
     # Event handlers

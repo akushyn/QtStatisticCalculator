@@ -21,7 +21,7 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
 
     def data(self, index, role=None):
         if (role == QtCore.Qt.ToolTipRole) or (role == QtCore.Qt.DisplayRole) or (role == QtCore.Qt.EditRole):
-            return self._instruments[index.row()].name()
+            return self._instruments[index.row()].name
 
     def flags(self, QModelIndex):
         return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
@@ -31,7 +31,7 @@ class AkInstrumentListModel(QtCore.QAbstractListModel):
         if (role == QtCore.Qt.EditRole):
             row = index.row()
 
-            self._instruments[row].setName(value)
+            self._instruments[row].name = value
             self.dataChanged.emit(index, index)
             return True
 

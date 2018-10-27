@@ -18,30 +18,30 @@
     <enum>QLayout::SetDefaultConstraint</enum>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tabs_widget">
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="ImportTab">
+     <widget class="QWidget" name="tab_import">
       <attribute name="title">
        <string>Import</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="hbox_import">
          <item>
           <widget class="QSplitter" name="splitter">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <widget class="QTreeView" name="treeViewWindowFiles"/>
-           <widget class="QTableView" name="tableView"/>
+           <widget class="QTreeView" name="tree_view_windows_files"/>
+           <widget class="QTableView" name="table_view_imported_data"/>
           </widget>
          </item>
          <item alignment="Qt::AlignTop">
-          <widget class="QPushButton" name="btnImport">
+          <widget class="QPushButton" name="button_import_data">
            <property name="text">
-            <string>Add Data</string>
+            <string>Import Data</string>
            </property>
           </widget>
          </item>
@@ -49,31 +49,31 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="DownloadTab">
+     <widget class="QWidget" name="tab_download">
       <attribute name="title">
        <string>Instruments</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,4">
+        <layout class="QHBoxLayout" name="hbox_download" stretch="1,4">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <layout class="QVBoxLayout" name="left_vbox_download">
            <item>
-            <widget class="QLabel" name="labelSymbols">
+            <widget class="QLabel" name="lables_symbols">
              <property name="text">
               <string>Symbols: </string>
              </property>
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <layout class="QHBoxLayout" name="hbox_search_symbol">
              <item>
-              <widget class="QLineEdit" name="lineFilter"/>
+              <widget class="QLineEdit" name="line_search_symbol"/>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout">
+              <layout class="QHBoxLayout" name="hbox_delete_item">
                <item>
-                <widget class="QToolButton" name="toolButtonClearAll">
+                <widget class="QToolButton" name="button_clear_all">
                  <property name="text">
                   <string>Clear</string>
                  </property>
@@ -84,7 +84,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QToolButton" name="toolButtonDelete">
+                <widget class="QToolButton" name="button_delete">
                  <property name="text">
                   <string>Del</string>
                  </property>
@@ -99,24 +99,24 @@
             </layout>
            </item>
            <item>
-            <widget class="QListView" name="listViewImported"/>
+            <widget class="QListView" name="list_view_imported_symbols"/>
            </item>
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="vBoxRightDownload">
+          <layout class="QVBoxLayout" name="right_vbox_download">
            <item>
-            <widget class="QLabel" name="labelDatabaseCount">
+            <widget class="QLabel" name="label_database_count">
              <property name="text">
               <string>Database: </string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="AkTableView" name="ohlcTableView"/>
+            <widget class="AkTableView" name="table_view_dohlc_data"/>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBoxFilter">
+            <widget class="QGroupBox" name="gbox_filtering_data">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -134,9 +134,9 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_5">
               <item>
-               <layout class="QVBoxLayout" name="vBoxFilter">
+               <layout class="QVBoxLayout" name="vbox_filtering_data">
                 <item>
-                 <layout class="QFormLayout" name="fBoxFilterDate">
+                 <layout class="QFormLayout" name="fbox_filter_dates">
                   <property name="horizontalSpacing">
                    <number>30</number>
                   </property>
@@ -144,14 +144,14 @@
                    <number>5</number>
                   </property>
                   <item row="0" column="0">
-                   <widget class="QLabel" name="labelStartDate">
+                   <widget class="QLabel" name="label_start_date">
                     <property name="text">
                      <string>Start date: </string>
                     </property>
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="QDateEdit" name="dateStart">
+                   <widget class="QDateEdit" name="date_start">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -161,14 +161,14 @@
                    </widget>
                   </item>
                   <item row="1" column="0">
-                   <widget class="QLabel" name="labelEndDate">
+                   <widget class="QLabel" name="label_end_date">
                     <property name="text">
                      <string>End date: </string>
                     </property>
                    </widget>
                   </item>
                   <item row="1" column="1">
-                   <widget class="QDateEdit" name="dateEnd">
+                   <widget class="QDateEdit" name="date_end">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -180,7 +180,7 @@
                  </layout>
                 </item>
                 <item alignment="Qt::AlignHCenter">
-                 <widget class="QPushButton" name="btnFilter">
+                 <widget class="QPushButton" name="button_filter_data">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>

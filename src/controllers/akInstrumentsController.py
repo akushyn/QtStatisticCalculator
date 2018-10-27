@@ -5,8 +5,10 @@ from src.views.ui_instrumentView import Ui_InstrumentsDialog
 class AkInstrumentsController(QtWidgets.QDialog, Ui_InstrumentsDialog):
     def __init__(self, model=None):
         super(AkInstrumentsController, self).__init__()
-        self.model = model
-        self.setupUi()
+        super(AkInstrumentsController, self).setupUi(self)
+
+        self.setModal(True)
+        self.setWindowTitle("Instrument Data Manager")
 
         self._setup_connections()
         self._setup_model()
@@ -16,7 +18,7 @@ class AkInstrumentsController(QtWidgets.QDialog, Ui_InstrumentsDialog):
     # ---------------------------------------------------------------------
 
     def setupUi(self):
-        super(AkInstrumentsController, self).setupUi(self)
+
 
         self.setModal(True)
         self.setWindowTitle("Instrument Data Manager")

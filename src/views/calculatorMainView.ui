@@ -39,21 +39,21 @@
        <number>5</number>
       </property>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="vBox_left">
+       <layout class="QVBoxLayout" name="left_vbox">
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QLineEdit" name="search_instrument"/>
         </item>
         <item>
-         <widget class="QListView" name="instrumentsListView"/>
+         <widget class="QListView" name="instruments_list_view"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="vBox_right">
+       <layout class="QVBoxLayout" name="right_vbox">
         <item>
-         <layout class="QHBoxLayout" name="hBox_calculate">
+         <layout class="QHBoxLayout" name="hbox_calculate">
           <item>
-           <spacer name="horizontalSpacer">
+           <spacer name="horizontal_spacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -66,7 +66,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="btnCalculate">
+           <widget class="QPushButton" name="calculate_button">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -103,29 +103,29 @@
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="tabGraphs">
+          <widget class="QWidget" name="graphs_tab">
            <attribute name="title">
             <string>Graphs</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <widget class="PlotWidget" name="graphicsView"/>
+             <widget class="PlotWidget" name="graphics_table"/>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tabJournal">
+          <widget class="QWidget" name="journal_tab">
            <attribute name="title">
             <string>Journal</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_8">
             <item>
-             <layout class="QVBoxLayout" name="vBoxJournal" stretch="0,3">
+             <layout class="QVBoxLayout" name="vbox_journal" stretch="0,3">
               <item>
-               <layout class="QHBoxLayout" name="hBoxNote">
+               <layout class="QHBoxLayout" name="hbox_note">
                 <item>
-                 <layout class="QVBoxLayout" name="vBoxCalendar">
+                 <layout class="QVBoxLayout" name="vbox_calendar">
                   <item>
-                   <widget class="QCalendarWidget" name="calendar">
+                   <widget class="QCalendarWidget" name="journal_calendar">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -135,9 +135,9 @@
                    </widget>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="hBoxButtons">
+                   <layout class="QHBoxLayout" name="hbox_buttons">
                     <item>
-                     <widget class="QPushButton" name="btnOK">
+                     <widget class="QPushButton" name="journal_ok_button">
                       <property name="enabled">
                        <bool>true</bool>
                       </property>
@@ -159,7 +159,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="btnClear">
+                     <widget class="QPushButton" name="journal_clear_button">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -182,7 +182,7 @@
                  </layout>
                 </item>
                 <item>
-                 <widget class="QTextEdit" name="textNote">
+                 <widget class="QTextEdit" name="journal_text_note">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                     <horstretch>1</horstretch>
@@ -194,7 +194,7 @@
                </layout>
               </item>
               <item>
-               <widget class="AkTableView" name="notesTableView"/>
+               <widget class="AkTableView" name="journal_notes_table"/>
               </item>
              </layout>
             </item>
@@ -217,60 +217,60 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menu_file">
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="menuNew">
+    <widget class="QMenu" name="action_new_analysis">
      <property name="title">
       <string>New...</string>
      </property>
-     <addaction name="actionAnalysis"/>
+     <addaction name="action_analysis"/>
     </widget>
-    <addaction name="menuNew"/>
+    <addaction name="action_new_analysis"/>
     <addaction name="separator"/>
-    <addaction name="actionConnect"/>
-    <addaction name="actionDisconnect"/>
+    <addaction name="action_connect"/>
+    <addaction name="action_disconnect"/>
     <addaction name="separator"/>
-    <addaction name="actionExit"/>
+    <addaction name="action_exit"/>
    </widget>
-   <widget class="QMenu" name="menuTools">
+   <widget class="QMenu" name="menu_tools">
     <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="actionInstrumentView"/>
-    <addaction name="actionHistoricalView"/>
+    <addaction name="action_instruments_view"/>
+    <addaction name="action_historical_view"/>
     <addaction name="separator"/>
-    <addaction name="actionConnectionsView"/>
-    <addaction name="actionOptionsView"/>
+    <addaction name="action_connections_view"/>
+    <addaction name="action_options_view"/>
    </widget>
-   <widget class="QMenu" name="menuView">
+   <widget class="QMenu" name="menu_view">
     <property name="title">
      <string>&amp;Analysis</string>
     </property>
-    <addaction name="actionStatistic_Analysis"/>
-    <addaction name="actionCreate_Analysis"/>
-    <addaction name="actionCalculator"/>
+    <addaction name="action_statistic_analysis"/>
+    <addaction name="action_create_analysis"/>
+    <addaction name="action_calculator"/>
     <addaction name="separator"/>
-    <addaction name="actionSeries_Analysis"/>
-    <addaction name="actionCombinations_Analysis"/>
+    <addaction name="action_series_analysis"/>
+    <addaction name="action_combinations_analysis"/>
     <addaction name="separator"/>
-    <addaction name="actionSettings"/>
+    <addaction name="action_settings"/>
    </widget>
-   <widget class="QMenu" name="menuHelp">
+   <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionHelp"/>
-    <addaction name="actionAbout"/>
+    <addaction name="action_help"/>
+    <addaction name="action_about"/>
    </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuTools"/>
-   <addaction name="menuView"/>
-   <addaction name="menuHelp"/>
+   <addaction name="menu_file"/>
+   <addaction name="menu_tools"/>
+   <addaction name="menu_view"/>
+   <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionHelp">
+  <action name="action_help">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/help.bmp</normaloff>:/icons/menu/help.bmp</iconset>
@@ -282,7 +282,7 @@
     <string>F1</string>
    </property>
   </action>
-  <action name="actionAbout">
+  <action name="action_about">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/about.bmp</normaloff>:/icons/menu/about.bmp</iconset>
@@ -291,7 +291,7 @@
     <string>About</string>
    </property>
   </action>
-  <action name="actionConnect">
+  <action name="action_connect">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/connect.bmp</normaloff>:/icons/menu/connect.bmp</iconset>
@@ -300,7 +300,7 @@
     <string>Connect...</string>
    </property>
   </action>
-  <action name="actionDisconnect">
+  <action name="action_disconnect">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/disconnect.bmp</normaloff>:/icons/menu/disconnect.bmp</iconset>
@@ -309,7 +309,7 @@
     <string>Disconnect...</string>
    </property>
   </action>
-  <action name="actionExit">
+  <action name="action_exit">
    <property name="text">
     <string>Exit</string>
    </property>
@@ -317,7 +317,7 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionInstrumentView">
+  <action name="action_instruments_view">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/instruments.bmp</normaloff>:/icons/menu/instruments.bmp</iconset>
@@ -329,7 +329,7 @@
     <string>Ctrl+I</string>
    </property>
   </action>
-  <action name="actionHistoricalView">
+  <action name="action_historical_view">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/history.bmp</normaloff>:/icons/menu/history.bmp</iconset>
@@ -341,7 +341,7 @@
     <string>Ctrl+H</string>
    </property>
   </action>
-  <action name="actionConnectionsView">
+  <action name="action_connections_view">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/connections.bmp</normaloff>:/icons/menu/connections.bmp</iconset>
@@ -350,7 +350,7 @@
     <string>Connection Manager...</string>
    </property>
   </action>
-  <action name="actionOptionsView">
+  <action name="action_options_view">
    <property name="icon">
     <iconset resource="../Resources.qrc">
      <normaloff>:/icons/menu/options.bmp</normaloff>:/icons/menu/options.bmp</iconset>
@@ -377,37 +377,37 @@
     <string>Journal</string>
    </property>
   </action>
-  <action name="actionCreate_Analysis">
+  <action name="action_create_analysis">
    <property name="text">
     <string>Calendar</string>
    </property>
   </action>
-  <action name="actionCalculator">
+  <action name="action_calculator">
    <property name="text">
     <string>Periods</string>
    </property>
   </action>
-  <action name="actionAnalysis">
+  <action name="action_analysis">
    <property name="text">
     <string>Analysis</string>
    </property>
   </action>
-  <action name="actionSeries_Analysis">
+  <action name="action_series_analysis">
    <property name="text">
     <string>Series</string>
    </property>
   </action>
-  <action name="actionCombinations_Analysis">
+  <action name="action_combinations_analysis">
    <property name="text">
     <string>Combinations</string>
    </property>
   </action>
-  <action name="actionStatistic_Analysis">
+  <action name="action_statistic_analysis">
    <property name="text">
     <string>Statistic</string>
    </property>
   </action>
-  <action name="actionSettings">
+  <action name="action_settings">
    <property name="text">
     <string>Settings...</string>
    </property>
@@ -433,9 +433,9 @@
  </resources>
  <connections>
   <connection>
-   <sender>btnOK</sender>
+   <sender>journal_ok_button</sender>
    <signal>clicked()</signal>
-   <receiver>calendar</receiver>
+   <receiver>journal_calendar</receiver>
    <slot>showSelectedDate()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -449,9 +449,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>btnClear</sender>
+   <sender>journal_clear_button</sender>
    <signal>clicked()</signal>
-   <receiver>textNote</receiver>
+   <receiver>journal_text_note</receiver>
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -465,9 +465,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>btnOK</sender>
+   <sender>journal_ok_button</sender>
    <signal>clicked()</signal>
-   <receiver>textNote</receiver>
+   <receiver>journal_text_note</receiver>
    <slot>copy()</slot>
    <hints>
     <hint type="sourcelabel">
